@@ -1,15 +1,19 @@
 {
-  "name": "PiSky",
-  "version": "0.0.0",
-  "description": "PiSky",
-  "main": "app.js",
-  "author": {
-    "name": "Mark",
-    "email": ""
-  },
-  "dependencies": {
-    "express": "3.4.4",
-    "jade": "*",
-    "stylus": "*"
-  }
+    "name": "PiSky",
+    "version": "0.0.0",
+    "description": "PiSky - The client for PiSkyNet Applications",
+    "main": "pisky.js",
+    "author": {
+        "name": "Mark Basham",
+        "email": ""
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Mnark/pisky.git"
+    },
+    "dependencies": {
+        "express": "3.4.4",
+        "jade": "*",
+        "stylus": "*"
+    }
 }
