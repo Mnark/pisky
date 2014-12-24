@@ -63,7 +63,7 @@ var Bot = function (data) {
             
             mysocket.on('updatechat', function (username, data) {
                 console.log("Got chat from " + username + " :" + data);
-                io.sockets.emit('updatechat', username, data);
+                self.emit('updatechat', username, data);
             });
                 //self.networks[i].socket = mysocket;
         }
@@ -147,9 +147,8 @@ var Bot = function (data) {
         socket.emit('message', 'Online');
         socket.on('send', function (data) {
             self.emit('send', data);
+            //self.io.sockets.emit('message', data);
         });
-        self.io.sockets.emit('message', data);
-
     });
     
     //this.on('newListener', function (listener) {
@@ -164,7 +163,7 @@ var Bot = function (data) {
         }
         self.io.sockets.emit('status', self);
         console.log("Emmitted:  status: " + bot);
-    }, 100);
+    }, 1000);
 };
 
 util.inherits(Bot, EventEmitter);
