@@ -12,7 +12,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>dd3d6781-e514-4232-be7b-ba5504e72888</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>app.js</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -30,7 +31,6 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="app.js" />
     <Compile Include="pisky.js" />
     <Compile Include="routes\index.js" />
   </ItemGroup>
@@ -49,7 +49,9 @@
     <Content Include="public\javascripts\respond.js" />
     <Content Include="public\javascripts\respond.min.js" />
     <Content Include="public\javascripts\_references.js" />
-    <Content Include="package.json" />
+    <Content Include="package.json">
+      <Publish>True</Publish>
+    </Content>
     <Content Include="public\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="public\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="public\fonts\glyphicons-halflings-regular.ttf" />
