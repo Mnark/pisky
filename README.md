@@ -1,4 +1,3 @@
-pisky
-=====
+﻿# PiSky
 
-PiSky bots to use under PiSkiNet
+
