@@ -1,17 +1,102 @@
 {
-  "name": "PiSky",
-  "version": "0.0.0",
-  "description": "PiSky - The client for PiSkyNet Applications",
-  "main": "pisky.js",
+  "_args": [
+    [
+      {
+        "raw": "pisky",
+        "scope": null,
+        "escapedName": "pisky",
+        "name": "pisky",
+        "rawSpec": "",
+        "spec": "latest",
+        "type": "tag"
+      },
+      "/home/pi/pisky"
+    ]
+  ],
+  "_from": "pisky@latest",
+  "_id": "pisky@0.0.314",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/pisky",
+  "_nodeVersion": "6.3.0",
+  "_npmOperationalInternal": {
+    "host": "packages-12-west.internal.npmjs.com",
+    "tmp": "tmp/pisky-0.0.314.tgz_1471731703303_0.5921060410328209"
+  },
+  "_npmUser": {
+    "name": "netbash",
+    "email": "mark.basham@ntlworld.com"
+  },
+  "_npmVersion": "3.10.5",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "pisky",
+    "scope": null,
+    "escapedName": "pisky",
+    "name": "pisky",
+    "rawSpec": "",
+    "spec": "latest",
+    "type": "tag"
+  },
+  "_requiredBy": [
+    "#USER"
+  ],
+  "_resolved": "https://registry.npmjs.org/pisky/-/pisky-0.0.314.tgz",
+  "_shasum": "c09d6775fd4897b125e2fce69014ee74b922b356",
+  "_shrinkwrap": null,
+  "_spec": "pisky",
+  "_where": "/home/pi/pisky",
   "author": {
     "name": "Mark Basham",
-    "email": ""
+    "email": "mark.basham@ntlworld.com"
   },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Mnark/pisky.git"
+  "bugs": {
+    "url": "https://github.com/mnark/pisky/issues"
   },
   "dependencies": {
-    "socket.io": "*"
-  }
+    "body-parser": "~1.14.1",
+    "express": "~4.13.3",
+    "node-uuid": "^1.4.7",
+    "socket.io": "~1.3.7"
+  },
+  "description": "Pisky - The client for PiSkyNet Applications",
+  "devDependencies": {},
+  "directories": {},
+  "dist": {
+    "shasum": "c09d6775fd4897b125e2fce69014ee74b922b356",
+    "tarball": "https://registry.npmjs.org/pisky/-/pisky-0.0.314.tgz"
+  },
+  "files": [
+    "public",
+    "pisky.js",
+    "certs",
+    "app.js"
+  ],
+  "homepage": "https://github.com/Mnark/pisky#readme",
+  "keywords": [
+    "socket.io",
+    "pisky",
+    "raspberry",
+    "home automation",
+    "remote control"
+  ],
+  "license": "MIT",
+  "main": "pisky.js",
+  "maintainers": [
+    {
+      "name": "netbash",
+      "email": "mark.basham@ntlworld.com"
+    }
+  ],
+  "name": "pisky",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mnark/pisky.git"
+  },
+  "scripts": {
+    "start": "node node_modules/pisky/app.js"
+  },
+  "version": "0.0.314"
 }
