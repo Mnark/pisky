@@ -8,8 +8,18 @@ var bodyParser = require('body-parser');
 var fs = require('fs');
 var uuid = require('node-uuid');
 
+function generateUUID() {
+    var d = new Date().getTime();
+    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+        var r = (d + Math.random() * 16) % 16 | 0;
+        d = Math.floor(d / 16);
+        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+    });
+    return uuid;
+};
+
 class Config {
-    constructor(data) {
+    constructor(data){
         var os = require('os');
         this.description = data.description || 'A piskybot'
         this.bottype = 'piskybot';
@@ -19,7 +29,7 @@ class Config {
         this.name = data.name || os.hostname();
         this._controllers = [];
     }
-    get controllers() {
+    get controllers (){
         var tempControllers = new Array();
         for (var i = 0; i < this._controllers.length; i++) {
             tempControllers.push(this._controllers[i].getConfig());
@@ -35,7 +45,7 @@ class Config {
 //    return tempControllers;
 //};
 Config.prototype.loadConfig = function () {
-
+  
 };
 Config.prototype.saveConfig = function () {
     //    var fs = require("fs");
@@ -49,15 +59,15 @@ Config.prototype.saveConfig = function () {
 
 var Device = function (controller, data) {
     var self = this;
-    self.id = data.id || uuid.v1();
+    self.id = data.id || generateUUID();
     self.controllerId = controller.id;
     self.control = controller.control;
     self.name = data.name;
     self.description = data.description;
     self.image = data.image || "/images/device.png";
     self.visible = (data.visible || true);
-
-    switch (data.type ? data.type.toString().toUpperCase() : 'DEVICE') {
+    
+    switch (data.type ? data.type.toString().toUpperCase(): 'DEVICE') {
         case 'SWITCH':
             self.type = 'SWITCH';
             self.commands = ['Turn', 'Switch', 'Put'];
@@ -75,20 +85,20 @@ var Device = function (controller, data) {
         default:
             self.type = 'PISKY';
     }
-
+    
     self.channel = data.channel;
     self.device = data.device;
     self.family = data.family;
     self.switchcode = data.switchcode;
     self.value = data.value;
     self.callback = controller.callback;
-
+    
     self.interval = data.interval || null;
-
+    
     self.read = function () {
         return self.value;
     };
-
+    
     self.setValue = function (value) {
         self.value = value;
         if (typeof (self.callback) == "function") {
@@ -97,7 +107,7 @@ var Device = function (controller, data) {
             console.log("Device " + self.name + " has no callback method");
         };
     };
-
+    
     //self.updateStatus = function () {
     //    console.log("device (" + self.name + ")updating status");
     //    self.callback(self.controllerId, self.id, self.value);
@@ -110,7 +120,7 @@ var Device = function (controller, data) {
 
 var Controller = function (data, callback) {
     var self = this;
-    self.id = data.id || uuid.v1();
+    self.id = data.id || generateUUID();
     self.name = data.name;
     self.description = data.description;
     self.control = data.control;
@@ -125,22 +135,22 @@ var Controller = function (data, callback) {
     if (typeof (self.pulse) == "number") {
         setInterval(self.heartbeat, self.pulse);
     };
-
+    
     self.getConfig = function () {
         return {
             id: self.id,
-            name: self.name,
-            description: self.description,
-            image: self.image,
+            name: self.name, 
+            description: self.description, 
+            image : self.image,
             visible: self.visible,
             devices: self.devices,
-            //            html: self.control.html
+    //            html: self.control.html
         };
     };
 
 };
 
-class Thing extends EventEmitter {
+class Thing extends EventEmitter{
     constructor(data, callback) {
         //console.log('Constructor of Thing called for ' + data.name)
         super();
@@ -158,17 +168,18 @@ class Thing extends EventEmitter {
         this.imageProviders = data.imageProviders || new Array();
         this.videoProviders = data.videoProviders || new Array();
         this.audioProviders = data.audioProviders || new Array();
-        this._appget = new Array();
+        this._appget = [];
+        this._appuse = [];
     }
-
-    get config() {
+    
+    get config () {
         return {
             id: this.id,
-            name: this._name,
-            description: this.description,
+            name: this._name, 
+            description: this.description, 
             visible: this.visible,
-            image: this.image,
-            img: this.img,
+            image : this.image,
+            img : this.img,
             html: this.html,
             socket: this.socket,
             states: this.states,
@@ -178,27 +189,27 @@ class Thing extends EventEmitter {
         };
     }
 
-    set host(value) {
+    set host (value) {
         this.callback = value;
     }
 
-    get name() { return this._name }
-    set name(value) { this._name = value }
+    get name () { return this._name}
+    set name (value) { this._name = value}
 
-    get createUuid() { return uuid.v1() }
+    get createUuid () { return uuid.v1()}
 
-    getState(name) {
-        for (var i = 0; i < this.states.length; i++) {
-            if (this.states[i].name == name) {
+    getState (name){
+        for (var i = 0 ; i < this.states.length; i++){
+            if ( this.states[i].name == name){
                 return this.states[i].value;
             }
         }
         return;
     }
 
-    setState(name, value) {
-        for (var i = 0; i < this.states.length; i++) {
-            if (this.states[i].name == name) {
+    setState (name, value){
+        for (var i = 0 ; i < this.states.length; i++){
+            if ( this.states[i].name == name){
                 this.states[i].value = value;
                 return;
             }
@@ -208,48 +219,7 @@ class Thing extends EventEmitter {
     }
 };
 
-//Thing.prototype.html = "thing.html";
-
-//Thing.prototype._appget = [];
-
-//Thing.prototype.createUuid = function () {
-//    return uuid.v1()
-//};
-
-//Thing.prototype.get = function (state) {
-//    return this.states[state];
-//};
-
-//Thing.prototype.set = function (state, value) {
-//    if (this.states.indexOf(state) == -1) {
-//        this.states.push({ name: state, value: value });
-//        return;
-//    }
-//    this.states[state] = value;
-//    return;
-//};
-
-//Thing.prototype.getConfig = function () {
-//    return {
-//        id: this.id,
-//        name: this.name, 
-//        description: this.description, 
-//        visible: this.visible,
-//        image : this.image,
-//        img : this.img,
-//        html: this.html,
-//        socket: this.socket,
-//        states: this.states,
-//        imageProviders: this.imageProviders,
-//        videoProviders: this.videoProviders
-//    };
-//};
-
-//Thing.prototype.config = function (value) {
-//    return new Config(value);
-//};
-
-class Host extends Thing {
+class Host extends Thing{
     constructor(data) {
         super(data);
         var self = this;
@@ -271,18 +241,18 @@ class Host extends Thing {
         };
         self.port = data.port || 80;
         self.httpsPort = data.httpsPort || 443;
-
+        
         self.server = http.createServer(self.app);
         self.httpsServer = https.createServer({
             key: fs.readFileSync(data.key ? data.key : __dirname + '/certs/2b71b8b9-a69a-4d55-b5d6-60a9b044a065.private.pem'),
             cert: fs.readFileSync(data.cert ? data.cert : __dirname + '/certs/2b71b8b9-a69a-4d55-b5d6-60a9b044a065.public.pem')
         }, self.app);
-
+        
         self.server.listen(self.port);
         self.httpsServer.listen(self.httpsPort);
-
+        
         self.app.use(bodyParser.json());
-
+        
         self.app.get("/", function (req, res) {
             //console.log("Requesting root file");
             if (req.secure) {
@@ -294,7 +264,7 @@ class Host extends Thing {
             }
 
         });
-
+        
         self.app.post('/login', function (req, res) {
             //self.passport.authenticate('local', {
             //    successRedirect: '/loginSuccess',
@@ -303,43 +273,43 @@ class Host extends Thing {
             if (req.body.image) {
                 var base64Data = req.body.image.replace(/^data:image\/png;base64,/, "");
                 try {
-                    //           self.fs.mkdirSync("//sharecenter/PiUsers/" + req.body.user);
+            //           self.fs.mkdirSync("//sharecenter/PiUsers/" + req.body.user);
                 } catch (e) {
                     if (e.code != 'EEXIST') {
                         throw e;
                     }
                 }
-                //        self.fs.writeFile("//sharecenter/PiUsers/" + req.body.user + "/" +  uuid.v1() + ".png", base64Data, 'base64', function (err) {
-                //            console.log(err);
-                //        });
+            //        self.fs.writeFile("//sharecenter/PiUsers/" + req.body.user + "/" + generateUUID() + ".png", base64Data, 'base64', function (err) {
+            //            console.log(err);
+            //        });
             }
             self.users.push({ name: req.body.user });
             res.send('login');
         });
-
+        
         self.app.use(express.static('public'));
         self.app.use(express.static(__dirname + '/public'));
-
+        
         self.io = require('socket.io')
-            .listen(self.httpsServer.listen(self.httpsPort))
-            .use(function (socket, next) {
-                //console.log("Query: ", socket.handshake.query);
-                //// return the result of next() to accept the connection.
-                //if (socket.handshake.query.username == "Mark") {
-                return next();
-                //}
-                //// call next() with an Error if you need to reject the connection.
-                //next(new Error('Authentication error'));
-            });
-
+        .listen(self.httpsServer.listen(self.httpsPort))
+        .use(function (socket, next) {
+            //console.log("Query: ", socket.handshake.query);
+            //// return the result of next() to accept the connection.
+            //if (socket.handshake.query.username == "Mark") {
+            return next();
+            //}
+            //// call next() with an Error if you need to reject the connection.
+            //next(new Error('Authentication error'));
+        });
+        
         // usernames which are currently connected to the chat
         self.users = [];
         self.things = [];
         // rooms which are currently available in chat
         self.rooms = ['openchat', '@bots'];
-
+        
         self.interval = data.interval || 60000;
-
+        
         self.status = new Object();
         self.status.user = data.user || '';
         self.status.datetime = new Date();
@@ -348,7 +318,7 @@ class Host extends Thing {
         self.status.acceleration = 0;
         self.status.poistion = 0;
         self.status.devices = [];
-
+        
         //Load or Create Configuration
         //    try {
         //        self._config = require("." + self.os.hostname() + ".config.json");
@@ -373,22 +343,22 @@ class Host extends Thing {
         //       self._config.interval = parseInt(data.interval) || 50000;
         //       self._config.controllers = [];
         //   }
-
+        
         //    self._config.controllers = function (){
         //        var tempControllers = new Array();
         //        for (var i = 0; i < self._config.controllers.length; i++){
-
+        
         //            tempControllers.push(self._config.controllers[i].getConfig());
         //       }
         //        return tempControllers;
         //    };
-
+        
         self._config.country = "Unknown";
         self._config.city = "Unknown";
         self._config.wanip = "Unknown";
         self._config.lanip = "Unknown";
         self._config.lanport = self.port;
-
+        
         //Find geo location from ip address
         //http.get("http://www.telize.com/geoip", function (res) {
         //    res.on("data", function (chunk) {
@@ -400,11 +370,11 @@ class Host extends Thing {
         //}).on('error', function (e) {
         //    console.log("Got error reading geoip: " + e.message);
         //});
-
+        
         self.networks = [];
         //self.country = "";
         //self.city = "";
-
+        
         self.networkInterfaces = self.os.networkInterfaces();
         for (var i in self.networkInterfaces) {
             if (self._config.lanip == "Unknown") {
@@ -419,9 +389,9 @@ class Host extends Thing {
                 }
             }
         }
-
+        
         self.lanurl = "http://" + self._config.lanip + ":" + self._config.lanport + "/";
-
+        
         self.addNetwork = function (name, url, callbackurl) {
             var ioc = require('socket.io-client');
             var socket = ioc.connect(url, { query: { id: self.id, username: self.name, image: 'imagecode' } });
@@ -432,9 +402,9 @@ class Host extends Thing {
                     socket.emit('addthing', { config: self.things[thing].getConfig(), socket: socket.id });
                 }
             });
-
+            
             socket.on('disconnect', function () {
-
+                    
                 if (socket.handshake.query.username) {
                     console.log('disconnect: ' + socket.handshake.query.username);
                     for (var i = 0; i < self.users.length; i++) {
@@ -478,36 +448,36 @@ class Host extends Thing {
                 //            console.log('Not for a thing, so telling the app');
                 self.emit(data.command, data.data);
             });
-
+                
             socket.on('updatechat', function (username, data) {
-                //            console.log("Got chat from " + username + " :" + data);
-                //            self.io.emit('updatechat', username, data);
+            //            console.log("Got chat from " + username + " :" + data);
+            //            self.io.emit('updatechat', username, data);
             });
-
+            
             socket.on('send', function (event) {
                 console.log("Got send and raising back to the app");
                 self.emit('send', event); //emit the event back to the bot
-                //socket.broadcast.to(event.socketId).emit('send', event);
-                //socket.emit('send', event);
-                //self.io.sockets.emit('send', event);
+                    //socket.broadcast.to(event.socketId).emit('send', event);
+                    //socket.emit('send', event);
+                    //self.io.sockets.emit('send', event);
             });
-
+            
             socket.on('status', function (event) {
                 console.log("Got status and raising back to the app");
                 self.emit('status', event); //emit the event back to the bot
             });
-
+            
             socket.on('things', function (things) {
                 console.log("Got things back from " + name);
                 for (thing in things) {
-                    self.addThing(new Thing(things[thing])) ? console.log("Added " + things[thing].name + ' id: ' + things[thing].id) : console.log("Already knew about " + things[thing].name);
+                    self.addThing(new Thing(things[thing])) ? console.log("Added " + things[thing].name + ' id: ' + things[thing].id)  : console.log("Already knew about " + things[thing].name);
                 }
                 //self.emit('status', event); //emit the event back to the bot
             });
-
+            
             self.networks.push({ name: name, url: url, callbackurl: callbackurl, socket: socket });
         };
-
+        
         self.getDevice = function (id) {
             for (var i = 0; i < self._config.controllers.length; i++) {
                 for (var j = 0; j < self._config.controllers[i].devices.length; j++) {
@@ -518,24 +488,30 @@ class Host extends Thing {
             }
             return false;
         };
-
+        
         self.addThing = function (thing) {
+            console.log("Request to add thing: " + thing.name + ' id: ' + thing.id + ' thing instanceof Thing: ' + (thing instanceof Thing) + ' thing instanceof Host: ' + (thing instanceof Host));
             if (self.getThing(thing.id)) {
+                console.log("Already knew about thing: " + thing.name + ' id: ' + thing.id);
                 return false;
             } else {
                 if (thing instanceof Thing || thing instanceof Host) {
+                    console.log("adding thing: " + thing.name + ' id: ' + thing.id);
                     thing.on('alert', (directive) => {
+                        console.log("thing ALERTED: " + thing.name + ' id: ' + thing.id);
                         self.io.emit('alert', directive);
                     })
                     thing.on('status', (status) => {
-                        self.io.emit('status', { id: thing.id, states: status });
+                        console.log("thing STATUS: " + thing.name + ' id: ' + thing.id);
+                        self.io.emit('status', {id: thing.id, states: status});
                     })
                     self.things.push(thing);
                 } else {
                     var a = new Thing(thing);
                     self.things.push(a);
+                    console.log("adding NEW thing: " + thing.name + " socket: " + a.socket);
                 };
-
+                
                 //Get the homepage of the thing that has connected
                 if (thing.config) {
                     //self.http.get(thing.config.url, function (res) {
@@ -544,12 +520,23 @@ class Host extends Thing {
                     //    console.log("Homepage not available: " + e.message);
                     //}).end();
                 };
+
                 if (Array.isArray(thing._appget)) {
                     for (var index = 0; index < thing._appget.length; index++) {
                         if ((typeof thing._appget[index] === "object") && (thing._appget[index] !== null)) {
                             //                        console.log("Adding _appget for " + thing._appget[index].path);
                             self.app.get(thing._appget[index].path, thing._appget[index].callback);
                         }
+                    }
+                };
+                console.log("Adding _appuse for " + thing._appuse.length);
+                if (Array.isArray(thing._appuse)) {
+                    for (var index = 0; index < thing._appuse.length; index++) {
+                       // if ((typeof thing._appuse[index] === "object") && (thing._appuse[index] !== null)) {
+                            console.log("Adding _appuse for " + thing._appuse[index]);
+
+                            self.app.use(express.static(thing._appuse[index]));
+                       // }
                     }
                 };
                 if (Array.isArray(thing.things)) {
@@ -561,7 +548,7 @@ class Host extends Thing {
             };
 
         };
-
+        
         self.getThing = function (id) {
             for (var i = 0; i < self.things.length; i++) {
                 if (self.things[i].id == id) {
@@ -570,7 +557,7 @@ class Host extends Thing {
             }
             return false;
         };
-
+        
         self.createDevice = function (controller, data) {
             var a = new Device(controller, data);
             for (var i = 0; i < self._config.controllers.length; i++) {
@@ -583,12 +570,12 @@ class Host extends Thing {
             //self.saveConfig();
             return a;
         };
-
+        
         self.updateDevice = function (id, property, value) {
             //        console.log("Pisky: updateDevice id:" + id + " property: " + property + " value :" + value);
             var dev = self.getDevice(id);
             if (dev) { dev.setValue(value) };
-
+            
             for (var i = 0; i < self.status.devices.length; i++) {
                 if (self.status.devices[i].id == id) {
                     self.status.devices[i][property] = value;
@@ -603,20 +590,20 @@ class Host extends Thing {
                 }
             }
         };
-
+        
         self.callback = function (controllerId, id, value) {
             //self.io.sockets.emit("status", {
             self.io.emit("status", {
                 botId: self.id, controllerId: controllerId, deviceId: id, value: value
             });
-
+            
             for (var i = 0; i < self.networks.length; i++) {
                 self.networks[i].socket.emit("status", {
                     botId: self.id, controllerId: controllerId, deviceId: id, value: value
                 });
             };
         };
-
+        
         self.createController = function (data, obj) {
             if (typeof obj == 'function') {
                 data.control = new obj();
@@ -631,7 +618,7 @@ class Host extends Thing {
             }
             return a;
         }
-
+        
         self.updateStatus = function () {
             for (var i = 0; i < self.status.devices.length; i++) {
                 if (self.status.devices[i].control) {
@@ -658,13 +645,13 @@ class Host extends Thing {
                 self.io.emit('status', self.status);
             }
         }
-
+        
         setInterval(self.updateStatus, self._config.interval);
-
+        
         self.alert = function (message) {
             self.io.emit('alert', { 'message': message, 'from': self.name })
         }
-
+        
         self.io.on('connection', function (socket) {
             console.log("connection from: " + socket.handshake.query.username);
             socket.on('send', function (event) {
@@ -681,6 +668,7 @@ class Host extends Thing {
                         var a = self.getThing(event.id);
                         a.emit('feedback', event);
                     } else {
+                        //console.log("Pisky Emmiting Send to application. deviceId =" + event.deviceId + " command: " + event.command + " value: " + event.value);
                         self.emit('send', event);
                     }
                 }
@@ -710,7 +698,7 @@ class Host extends Thing {
                     //    //    socket.emit('status', device);
                     //    //});
                     //});
-
+                    
                     // 
                     //nsp.emit('hi', 'everyone!');
                     // store the name in the socket session for this client
@@ -721,14 +709,14 @@ class Host extends Thing {
                     //usernamess[thing.name] = thing.name;
                     //self.users.push(thing);
                     //                self.rooms.push(thing);
-
+                    
                     // join your rooms
                     socket.join('openchat');
                     socket.broadcast.to('openchat').emit('updatechat', thing.name + " has come online.");
                     socket.join('@bots');
                     //socket.broadcast.to('@bots').emit('updatethings', self.things);
                     socket.join(thing.name);
-
+                    
                     // echo to client they've connected
                     socket.emit('updatechat', 'SERVER', 'you have connected to ' + thing.name);
                     socket.broadcast.emit('updatechat', thing.name, ' Online');
@@ -793,7 +781,7 @@ class Host extends Thing {
                 socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username + ' has joined this room');
                 socket.emit('updaterooms', self.rooms, newroom);
             });
-            socket.on('config', function (bot) {
+            socket.on('config', function (bot) {      
             });
             socket.on('alert', function (message) {
                 console.log("Got an alert from " + message.from);
@@ -830,7 +818,7 @@ class Host extends Thing {
                             console.log(socket.username + " logged out!");
                         }
                     }
-                    //                console.log("System: A thing called has disconnected:" + JSON.stringify(socket.username))
+                //                console.log("System: A thing called has disconnected:" + JSON.stringify(socket.username))
                 }
 
             });
@@ -840,6 +828,7 @@ class Host extends Thing {
             socket.emit('init', self.id);
             //console.log("Emmiting controllers");
             socket.emit('controllers', self._config.controllers);
+            console.log("Emmiting " + self.things.length + " things");
             //self.things.forEach(function (thing) {console.log(' thing.name:' + thing.name)}) 
             //socket.to(socket.id).emit('things', self.things);
             var newThings = [];
@@ -854,12 +843,12 @@ class Host extends Thing {
             //console.log("Emmiting status");
             socket.emit('status', self.status);
         });
-
+        
         self.states = [{ 'name': 'Operating System', 'value': self.os.arch() }
-            , { 'name': 'CPUs', 'value': self.os.cpus().length }
-            , { 'name': 'Platform', 'value': self.os.platform() }
-            , { 'name': 'Operating System', 'value': self.os.type() }];
-
+                , { 'name': 'CPUs', 'value': self.os.cpus().length }
+                , { 'name': 'Platform', 'value': self.os.platform() }
+                , { 'name': 'Operating System', 'value': self.os.type() }];
+        
         //var a = new Thing(self);
         //a.set('users', self.count('users'));
         self.addThing(self);
