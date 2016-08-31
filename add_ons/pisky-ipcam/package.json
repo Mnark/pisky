@@ -1,0 +1,24 @@
+{
+  "name": "pisky-ipcam",
+  "version": "0.0.6",
+  "description": "pisky-ipcam",
+  "main": "app.js",
+  "author": {
+    "name": "Mark",
+    "email": "mark.basham@ntlworld.com"
+  },
+  "dependencies": {
+    "mjpeg-proxy": "^0.2.0",
+    "pisky": "~0.0.308"
+  },
+  "files": [
+    "public",
+    "cameras",
+    "app.js"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mnark/pisky/issues"
+  },
+  "readmeFilename": "README.md"
+}

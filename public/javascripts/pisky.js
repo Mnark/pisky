@@ -162,7 +162,7 @@ Thing.prototype.view = function (thing) {
 Thing.prototype.command = function (name) {
     //        for (var index = 0; index < self.commands.length; index++) {
     console.log("command found");
-    this.callback(this.id, name);
+    this.callback(this.id(), name);
     return false;
     //        }
 };

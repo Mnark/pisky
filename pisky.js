@@ -441,6 +441,7 @@ class Host extends Thing{
                         } else {
                             var listened = self.things[index].emit('command', data);
                             console.log("Listeners:" + listened);
+                            break;
                         }
                         return;
                     };

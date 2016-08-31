@@ -98,5 +98,5 @@
   "scripts": {
     "start": "node node_modules/pisky/app.js"
   },
-  "version": "0.0.314"
+  "version": "0.1.0"
 }

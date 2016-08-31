@@ -1,0 +1,56 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div>
+        <h3 style="text-align: center" data-bind="text: name">Pisky IpCam</h3>
+        <!--img src="#" data-bind="attr: {src: image}" style="width: 640px" /-->
+        <img src="#" data-bind="attr: {src: image}" style="width: 100%"/>
+        <table border="0" style="text-align: center">
+            <tr>
+                <td width=50%></td>
+                <td>
+                    <table border="0">
+                        <tr>
+                            <td width="33%">&nbsp;</td>
+                            <td width="33%">
+                                <a href="#" data-bind="event: {mousedown: function() {command('up')}, mouseup: function() {command('stop up')}}" data-role="button"
+                                    data-icon="arrow-u" data-mini="true" data-iconpos="notext">&nbsp;</a>
+                            </td>
+                            <td width="33%">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <a href="#" data-bind="event: {mousedown: function() {command('left')},  mouseup: function() {command('stop left')}}" data-role="button"
+                                    data-icon="arrow-l" data-iconpos="notext">&nbsp;</a>
+                            </td>
+                            <td>
+                                <a href="#" data-bind="event: {click: function() {command('stop')}}" data-role="button"
+                                    data-icon="grid" data-iconpos="notext">&nbsp;</a>
+                            </td>
+                            <td>
+                                <a href="#" data-bind="event: {mousedown: function() {command('right')}, mouseup: function() {command('stop right')}}" data-role="button"
+                                    data-icon="arrow-r" data-iconpos="notext">&nbsp;</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td>
+                                <a href="#" data-bind="event: {mousedown: function() {command('down')}, mouseup: function() {command('stop down')}}" data-role="button"
+                                    data-icon="arrow-d" data-mini="true" data-iconpos="notext">&nbsp;</a>
+                            </td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </table>
+                </td>
+                <td width=50%></td>
+            </tr>
+        </table>
+        <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+    </div>
+
+</body>
+
+</html>
