@@ -752,15 +752,15 @@ class Host extends Thing{
                     if (self.things[index].id == data.id) {
                         //console.log('self.things[index].emit :' + self.things[index].emit);
                         if (self.things[index].socket) {
-                            console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
+                            //console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
                             self.io.emit('command', data);
                             //socket.broadcast.to(self.things[index].socket).emit('command', data);
                             //self.io.sockets[self.things[index].socket].emit(data);
                             //self.things[index].socket.emit(data);
                         } else {
-                            console.log("self.things[index].name: " + self.things[index].name);
+                            //console.log("self.things[index].name: " + self.things[index].name);
                             var listened = self.things[index].emit('command', data);
-                            console.log("Listeners:" + listened);
+                            //console.log("Listeners:" + listened);
                         }
                         return;
                     };

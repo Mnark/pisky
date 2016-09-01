@@ -1,0 +1,224 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Pisky Net</title>
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+    <meta name="viewport" content="width=device-width" />
+    <link href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet" />
+    <link href="/stylesheets/site.css" rel="stylesheet" />
+    <script src="/javascripts/events.js"></script>
+    <script src="https://modernizr.com/downloads/modernizr-latest.js"></script>
+    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.3.5.js"></script>
+    <script src="/javascripts/latlon-ellipsoidal.js"></script>
+    <script src="/javascripts/latlon-vincenty.js"></script>
+    <script src="/javascripts/dms.js"></script>
+    <script src="/javascripts/pisky.js"></script>
+    <script src="/javascripts/bot.js"></script>
+    <script src="/javascripts/vox.js"></script>
+    <script src="/javascripts/knockout.mapping.js"></script>
+    <script src="/javascripts/tracking/tracking.js"></script>
+    <!--<script src="/javascripts/tracking/tracking-min.js"></script>-->
+    <script src="/javascripts/tracking/data/face-min.js"></script>
+    <style>
+        video, canvas {
+            /*margin-left: 230px;
+            margin-top: 120px;*/
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="indexPage" data-role="page" data-theme="a">
+        <!-- chat_panel -->
+        <div data-role="panel" id="chat_panel" data-position="left" data-display="overlay" data-theme="b">
+            <h1>Chat</h1>
+            <div id="conversation" style="margin: 0 0 20px 0; overflow:hidden; font-family:Verdana ;font-size:8pt; color:lightgreen; text-shadow: none;">
+            </div>
+            <input id="chat_message" type="text" />
+            <button id="datasend" value="Send">Send</button>
+            <a id="chat_close" href="#" class="vox" data-rel="close" data-role="button" data-mini="true" data-icon="delete">Close</a>
+        </div>
+
+        <!-- settings_panel -->
+        <div data-role="panel" id="settings_panel" data-position="left" data-display="push" data-theme="b">
+            <h1>Controllers</h1>
+            <div>
+                <div data-role="collapsible-set" data-theme="b" data-content-theme="d">
+                    <div data-role="collapsible" data-bind="foreach: controllers">
+                        <img src="#" data-bind="attr: {src: image}" />
+                        <h2 data-bind="text: name">Filtered list</h2>
+                        <ul data-role="listview" data-bind="foreach: devices" data-divider-theme="d">
+                            <li><a href="index.html" data-bind="text: name"></a></li>
+                        </ul>
+                    </div>
+
+
+                </div>
+            </div>
+            <div>
+                <ul data-role="listview" data-inset="true" data-bind="foreach: controllers">
+                    <li>
+                        <a href="#" class="ui-grid-a">
+                            <img src="/images/home.png" data-bind="attr: {src: image}" />
+                            <span class="ui-block-a" data-bind="text: name"></span>
+                        </a>
+                        <a href="#" data-icon="arrow-d">
+                            Details
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a href="#" class="vox" data-role="button" data-icon="delete">Add Device</a>
+            <a href="#" class="vox" data-rel="close" data-role="button" data-mini="true" data-icon="delete">Close</a>
+        </div>
+
+        <div data-role="header" data-position="fixed" data-theme="b">
+            <div data-role="navbar" data-theme="a" data-iconpos="top">
+                <h1>PiSky Net</h1>
+                <ul>
+                    <li>
+                        <a href="#chat_panel" class="vox" data-icon="user" data-rel="popup" style="color:lightgreen">Chat</a>
+                    </li>
+                    <li>
+                        <a href="#" class="vox" data-icon="user">Log In</a>
+                    </li>
+                    <li>
+                        <a href="#" class="vox" data-icon="user">Console</a>
+                    </li>
+                    <li><a href="#settings_panel" class="vox" data-icon="gear" data-rel="popup" style="color:lightgreen">Settings</a></li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="property-page">
+            <div id="intro">
+                <h2 data-bind=""></h2>
+
+                <p>What is this place? Why am I here? How did you find it anyway?</p>
+            </div>
+            <hr />
+            <div class="property-page">
+                <label for="devs"> Devices <i>you control</i></label>
+                <ul id="devs" data-role="listview" data-inset="true">
+                    <!--<li>
+                        <a>
+                            <img src="/images/bot.png" />
+                            <div data-bind="text: name"></div>
+                        </a>
+                    </li>-->
+                    <!-- ko foreach: controllers -->
+                    <!-- ko if: visible -->
+                    <li> 
+                        <a href="#" data-bind="click: view">
+                            <img src="/images/ipcam.png" data-bind="attr: {src: image}"/>
+                            <div data-bind="text: name"></div>
+                            <!--<div data-bind="text: state"></div>-->
+                            <!--<div class="vox" data-bind="text: commandText"></div>-->
+                            <!--<img name="main" id="main" border="0" width="640" height="480" src="http://192.168.0.25/videostream.cgi?loginuse=admin&amp;loginpas=angussmokey">-->
+                        </a>
+                    </li>
+                    <!-- /ko -->
+                    <!-- ko foreach: devices -->
+                    <!-- ko if: visible -->
+                    <li>
+                        <a data-bind="click: toggle">
+                            <img src="/images/ipcam.png" data-bind="attr: {src: image}" />
+                            <div data-bind="text: name"></div>
+                            <!--<div data-bind="text: state"></div>-->
+                            <!--<div class="vox" data-bind="text: commandText"></div>-->
+
+                        </a>
+                    </li>
+                    <!-- /ko -->
+                    <!-- /ko -->
+                    <!-- /ko -->
+                </ul>
+            </div>
+            <div class="property-page">
+                <label for="things"> Things <i>These are not the droids you were looking for...</i></label>
+                <ul id="things" data-role="listview" data-inset="true" data-bind="foreach: things">
+                    <li>
+                        <a href="#" class="ui-grid-a"  data-bind="click: view">
+                            <img src="/images/bot.png" data-bind="attr: {src: img}" /> <!--data-bind="click: toggle"-->
+                            
+                            <span class="ui-block-a" data-bind="text: name"></span>
+                            <!--<span class="ui-block-b" data-bind="text: city"></span>-->
+                        </a>
+                        <!--a data-bind="attr: { href: 'http://' + lanip + ':' + lanport,}">
+                            Connect
+                        </a-->
+                    </li>
+                </ul>
+
+            </div>
+            <div class="property-page">
+                <label for="users"> Users <i></i></label>
+                <ul id="users" data-role="listview" data-inset="true" data-bind="foreach: users">
+                    <li>
+                        <a href="#" class="ui-grid-a">
+                            <!--data-bind="click: toggle"-->
+                            <img src="images/user.png" />
+                            <span class="ui-block-a" data-bind="text: name"></span>
+                            <!--<span class="ui-block-b" data-bind="text: city"></span>-->
+                        </a>
+                        <a data-bind="attr: { href: '#chat'}">
+                            Chat
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+
+            <div data-role="footer" data-position="fixed" data-theme="b">
+                <p style="float: right">&copy; 2015 - <a href="http://piskynet.azurewebsites.net" data-role="button"><span class="vox">Pi Sky Net</span> Productions</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Log In Dialog -->
+    <div data-role="page" id="logIn">
+        <form action="#">
+            <div style="padding:10px 20px;">
+                <h3>Please sign in</h3>
+                <table>
+                    <tr>
+                        <td>
+                            <canvas id="canvas" width="120" height="120"></canvas>
+                        </td>
+                        <td>
+                            <label for="un" class="ui-hidden-accessible">Username:</label>
+                            <input type="text" name="user" id="un" value="" placeholder="username" data-theme="a" />
+
+                            <label for="pw" class="ui-hidden-accessible">Password:</label>
+                            <input type="password" name="pass" id="pw" value="" placeholder="password" data-theme="a" />
+
+                        </td>
+                    </tr>
+                </table>
+
+                <button type="submit" data-theme="b">Sign in</button>
+                <!--<div style="position: fixed;">-->
+                <div style="position: relative; ">
+                    <video id="video" width="640" height="480" preload autoplay loop muted style="visibility:hidden; position: absolute"></video>
+                    <!--<canvas id="canvas" width="320" height="240"></canvas>-->
+                </div>
+                <!--</div>-->
+
+
+            </div>
+        </form>
+    </div>
+
+    <!-- Guest Dialog -->
+    <div data-role="page" id="guestPage">
+    </div>
+    <!--<script src="/main.js"></script>-->
+</body>
+</html>

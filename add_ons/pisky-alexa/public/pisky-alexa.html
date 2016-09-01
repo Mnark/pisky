@@ -1,0 +1,52 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div>
+        <img src="" data-bind="attr: {src: image}" style="width: 64px" />
+        <h3>Pisky Alexa</h3>
+        <div data-role="tabs">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#control" data-role="button" data-icon="bars" data-iconpos="top">Controls</a></li>
+                    <li><a href="#timers" data-role="button" data-icon="clock" data-iconpos="top">Timers</a></li>
+                    <li><a href="#registration" data-role="button" data-icon="info" data-iconpos="top">Registration</a></li>
+                    <li><a href="#history" data-role="button" data-icon="clock" data-iconpos="top">History</a></li>
+                </ul>
+            </div>
+
+            <div id="control" class="ui-content">
+                <a href="/recognise" target="regpanel" data-role="button" data-icon="audio" data-iconpos="top">Recognise</a>
+                <span data-bind="foreach: states">
+                    (<span data-bind="text: value">
+                    </span>) 
+                </span> 
+                <!--a href="#" data-role="button" data-icon="audio" data-iconpos="top" data-bind="click: function(){ command('start recording')}">Begin Recording</a>
+                <a href="#" data-role="button" data-icon="gear" data-iconpos="top" data-bind="click: function(){ command('play recording')}">Playback</a>
+                <a href="#" data-role="button" data-icon="gear" data-iconpos="top" data-bind="click: function(){ command('play sample')}">Play Sample</a-->
+            </div>
+
+            <div id="timers" class="ui-content" data-bind="foreach: timers">
+                <li><a href="#" data-role="button" data-icon="info" data-iconpos="top" data-bind="text: scheduledTime">A Timer?</a></li>
+            </div>
+
+            <div id="registration" class="ui-content">
+                <a href="/register" target="_blank" data-role="button" data-icon="delete" data-iconpos="top">Register</a>
+                <iframe id="regpanel" name="regpanel" src="https://www.npmjs.com/package/node-uuid">
+                </iframe>
+            </div>
+
+            <div id="history" class="ui-content" >
+                ToDo: Message  History
+            </div>
+
+            <div>
+                <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

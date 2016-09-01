@@ -1,0 +1,28 @@
+{
+  "name": "pisky-alexa",
+  "version": "0.0.2",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "license": "MIT",
+  "main": "pisky-alexa.js",
+  "description": "An Amazon Alexa service for Pisky",
+  "author": {
+    "name": "Mark",
+    "email": ""
+  },
+  "dependencies": {
+    "aplay": "^1.0.0",
+    "content-type": "^1.0.2",
+    "mespeak": "^2.0.0",
+    "mic": "^2.1.1",
+    "mpg123": "^0.2.1",
+    "multipartser": "^1.0.2",
+    "node-aplay": "^1.0.3",
+    "pisky": "~0.1.0",
+    "pisky-parser": "*",
+    "speaker": "^0.3.0", 
+    "http2": "*"
+  }
+}

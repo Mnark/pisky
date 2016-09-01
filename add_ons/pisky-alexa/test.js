@@ -1,0 +1,2 @@
+var a = JSON.parse('{"access-control-allow-origin":"*","x-amzn-requestid":"12eb26fffefd66c1-000060b5-0003820c-43c952f09220f97a-61a336df-1-","content-type":"multipart/related; boundary=------abcde123; type=application/json"}');
+var b = 4;

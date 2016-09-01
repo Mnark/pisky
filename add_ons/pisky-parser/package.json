@@ -1,0 +1,20 @@
+{
+  "name": "pisky-parser",
+  "version": "0.0.1",
+  "description": "A Multipart/Related response parser",
+  "main": "pisky-parser.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+    "dependencies": {
+    "content-type": "*"
+    },
+  "keywords": [
+    "Pisky",
+    "parser",
+    "multipart",
+    "related"
+  ],
+  "author": "Mark Basham <mark.basham@ntlworld.com> (http://piskynet.azurewebsites.net/)",
+  "license": "ISC"
+}

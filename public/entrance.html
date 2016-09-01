@@ -1,6 +1,5 @@
 ﻿<html>
 <head>
-
     <link href="stylesheets/site.css" rel="stylesheet" />
     <link href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
@@ -12,44 +11,35 @@
             -webkit-animation: Pisky 4s ease infinite;
             -moz-animation: Pisky 4s ease infinite;
             animation: Pisky 4s ease infinite;
-
             @-webkit-keyframes Pisky {
                 0% {
                     background-position: 0% 94%;
                 }
-
                 50% {
                     background-position: 100% 7%;
                 }
-
                 100% {
                     background-position: 0% 94%;
                 }
             }
-
             @-moz-keyframes Pisky {
                 0% {
                     background-position: 0% 94%;
                 }
-
                 50% {
                     background-position: 100% 7%;
                 }
-
                 100% {
                     background-position: 0% 94%;
                 }
             }
-
             @keyframes Pisky {
                 0% {
                     background-position: 0% 94%;
                 }
-
                 50% {
                     background-position: 100% 7%;
                 }
-
                 100% {
                     background-position: 0% 94%;
                 }
@@ -57,6 +47,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="piskygradient" style="width: 100%">
         <table border="0" style="text-align: center">
@@ -64,7 +55,8 @@
                 <td style="width: 40%"></td>
                 <td>
                     <h1 data-bind="text: name">Pisky&nbsp;Net&nbsp;Gateway</h1>
-                    <a href="/" onclick='javascript: event.target.protocol = "https"; event.target.port = 443;' data-role="button" data-icon="enter" data-iconpos="top">Enter</a>
+                    <a href="/" onclick='javascript: event.target.protocol = "https"; event.target.port = 443;' data-role="button" data-icon="enter"
+                        data-iconpos="top">Enter</a>
                 </td>
                 <td style="width: 40%"></td>
             </tr>
@@ -72,4 +64,5 @@
 
     </div>
 </body>
+
 </html>
