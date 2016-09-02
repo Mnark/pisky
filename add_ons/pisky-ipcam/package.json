@@ -2,7 +2,7 @@
   "name": "pisky-ipcam",
   "version": "0.0.6",
   "description": "pisky-ipcam",
-  "main": "app.js",
+  "main": "pisky-ipcam.js",
   "author": {
     "name": "Mark",
     "email": "mark.basham@ntlworld.com"

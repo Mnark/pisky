@@ -37,11 +37,38 @@ class Alert extends EventEmitter {
 class PiskyAlexa extends Thing {
     constructor(options) {
         if (!options.name) { options.name = 'Alexa' }
+        if (!options.html) { options.html = "/pisky-alexa.html" }
         super(options);
 
         this._alerts = [];
         this._sessionId = auth.getSessionId();
-        console.log('Session-id = ' + this._sessionId)
+
+        this.on('command', function (data) {
+            console.log('Alexa Received:' + JSON.stringify(data) + ' for target ' + data.value);
+            switch (data.command) {
+                case 'register':
+                    self.register(data.value);
+                    break;
+                case 'start recording':
+                    console.log('Starting recording!');
+                    self.createEvent("Recognize");
+                    break;
+                case 'play recording':
+                    var music = new sound(self.lastRecording);
+                    music.play();
+                    music.on('complete', function () {
+                        console.log('Done with playback of recording!');
+                    });
+                    break;
+                case 'play sample':
+                    var music = new sound('900yearsold.wav');
+                    music.play();
+                    music.on('complete', function () {
+                        console.log('Done with playback of sample!');
+                    });
+                    break;
+            }
+        });
 
         var self = this;
         self.registered = false;
@@ -49,6 +76,7 @@ class PiskyAlexa extends Thing {
             self.registered = true;
         };
         console.log('Registered = ' + self.registered)
+
         var BOUNDARY = 'pisky-boundary';
         const BOUNDARY_DASHES = '--';
         const NEWLINE = '\r\n';
@@ -57,7 +85,7 @@ class PiskyAlexa extends Thing {
         const AUDIO_CONTENT_DISPOSITION = 'Content-Disposition: form-data; name="audio"';
         const AUDIO_CONTENT_TYPE = 'Content-Type: application/octet-stream';
 
-        self.html = "/pisky-alexa.html"
+
         self.http2 = require('http2');
         self.mic = require('mic');
         self.setState('mic', 'IDLE');
@@ -65,13 +93,10 @@ class PiskyAlexa extends Thing {
         self.image = options.image || '/images/alexa.png';
         self.img = '/images/alexa.png'
         self.connected = false;
-
-
         self.lastacivity = -1;
 
-
         self.getImg = function (req, res) {
-            res.send(fs.readFileSync('/images/alexa.png'));
+            res.send(fs.readFileSync(__dirname + '/public/images/alexa.png'));
         };
 
         self.connect = function () {
@@ -160,7 +185,7 @@ class PiskyAlexa extends Thing {
             }
         };
 
-        self.authresponse = function (req, res) {cdls
+        self.authresponse = function (req, res) {
             console.log('Code:' + JSON.stringify(req.query.code));
             auth.authresponse(req.query.code, req.query.state, function (err, msg) {
                 if (err) {
@@ -169,7 +194,7 @@ class PiskyAlexa extends Thing {
                 console.log('Success:' + msg);
                 res.end('Success! Please close this window and return to Pisky.')
                 //self.emit('view', {'url':  url, 'target': 'regpanel'})
-           });
+            });
         };
 
         self.recognise = function (req, res) {
@@ -532,146 +557,76 @@ class PiskyAlexa extends Thing {
             //            }
         };
 
-        self.on('command', function (data) {
-            console.log('Alexa Received:' + JSON.stringify(data) + ' for target ' + data.data);
-            switch (data.command) {
-                case 'register':
-                    self.register(data.data);
-                    break;
-                case 'start recording':
-                    console.log('Starting recording!');
-                    self.createEvent("Recognize");
-                    break;
-                case 'play recording':
-                    var music = new sound(self.lastRecording);
-                    music.play();
-                    music.on('complete', function () {
-                        console.log('Done with playback of recording!');
-                    });
-                    break;
-                case 'play sample':
-                    var music = new sound('900yearsold.wav');
-                    music.play();
-                    music.on('complete', function () {
-                        console.log('Done with playback of sample!');
-                    });
-                    break;
+        self.register = function (target) {
+            var productId = 'Pisky_Alexa'
+            var missingProperties = [];
+            var dsn = false;
+            var interfaces = os.networkInterfaces();
+            for (var i in interfaces) {
+                if (dsn == false) {
+                    var net = interfaces[i];
+                    for (var j in net) {
+                        if (net[j].family == 'IPv4' && net[j].address != '127.0.0.1') {
+                            dsn = net[j].mac;
+                            console.log('dsn = ' + dsn)
+                            break;
+                        }
+                    }
+                }
             }
-        });
+
+            if (!dsn) {
+                console.log("Failed to find MAC address for Alexa registration");
+            }
+            var sessionId = this.createUuid;
+
+            crypto.randomBytes(REG_NUM_BYTES, (err, regCodeBuffer) => {
+                if (err) {
+                    console.log("failed on generate bytes", err);
+                    //callback(error("InternalError", "Failure generating code", 500));
+                    return;
+                } else {
+                    this.regCode = regCodeBuffer.toString('hex');
+                    console.log('This id = ' + sessionId)
+                    auth.state.sessionIds.push(sessionId);
+                    auth.state.regCodeToSessionId[this.regCode] = sessionId;
+                    auth.state.sessionIdToDeviceInfo[sessionId] = {
+                        productId: productId,
+                        dsn: dsn,
+                    };
+
+                    fs.writeFile('./cookie.js', JSON.stringify(auth.state));
+                    console.log('Reg Code:' + this.regCode + ' | Session Id:' + sessionId)
+                    if (this.regCode.length != REG_NUM_BYTES * 2 || !(this.regCode in auth.state.regCodeToSessionId)) {
+                        //callback(error('InvalidRegistrationCode', 'The provided registration code was invalid.', 401));
+                        return;
+                    } else {
+                        auth.sessionId = auth.state.regCodeToSessionId[this.regCode];
+                        var prodInfo = auth.state.sessionIdToDeviceInfo[sessionId];
+                        console.log('url: ' + auth.redirectToDeviceAuthenticate(prodInfo, this.regCode));
+                        console.log('target: ' + target);
+                        this.emit('view', { 'url': auth.redirectToDeviceAuthenticate(prodInfo, this.regCode), 'target': target });
+                    }
+                }
+            });
+        }
+
+        
 
         self._appget.push({ path: self.img, callback: self.getImg });
         self._appget.push({ path: '/provision/regCode', callback: auth.getRegCode });
         self._appget.push({ path: '/provision/accessToken', callback: auth.getAccessToken });
         self._appget.push({ path: '/provision/:regCode', callback: auth.getRegCode });
         self._appget.push({ path: '/authresponse', callback: self.authresponse });
-        self._appget.push({ path: '/register', callback: self.register });
+        //self._appget.push({ path: '/register', callback: self.register });
         self._appget.push({ path: '/recognise', callback: self.recognise });
+        this._appuse.push(__dirname + "/public");
 
         self.connect();
     }
 
     register(target) {
-        var self = this;
-        var productId = 'Pisky_Alexa'
-        var missingProperties = [];
-        var dsn = false;
-        var interfaces = os.networkInterfaces();
-        for (var i in interfaces) {
-            if (dsn == false) {
-                var net = interfaces[i];
-                for (var j in net) {
-                    if (net[j].family == 'IPv4' && net[j].address != '127.0.0.1') {
-                        dsn = net[j].mac;
-                        console.log('dsn = ' + dsn)
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!dsn) {
-            console.log("Failed to find MAC address for Alexa registration");
-        }
-        var sessionId = super.createUuid;
-
-        crypto.randomBytes(REG_NUM_BYTES, function (err, regCodeBuffer) {
-            if (err) {
-                console.log("failed on generate bytes", err);
-                //callback(error("InternalError", "Failure generating code", 500));
-                return;
-            } else {
-                this.regCode = regCodeBuffer.toString('hex');
-
-                console.log('This id = ' + sessionId)
-
-                auth.state.sessionIds.push(sessionId);
-                auth.state.regCodeToSessionId[this.regCode] = sessionId;
-                auth.state.sessionIdToDeviceInfo[sessionId] = {
-                    productId: productId,
-                    dsn: dsn,
-                };
-
-                fs.writeFile('./cookie.js', JSON.stringify(auth.state));
-                console.log('Reg Code:' + this.regCode + ' | Session Id:' + sessionId)
-                //auth.register(this.regCode, res, function (response) {
-                auth.register(this.regCode, target, function (err, url, target) {
-                    console.log('url: ' + url);
-                    console.log('target: ' + target);
-                    self.emit('view', {'url':  url, 'target': target})
-                });
-            }
-        });
-    }
-
-    register2(req, res) {
-        var productId = 'Pisky_Alexa'
-        var missingProperties = [];
-        var dsn = false;
-        var interfaces = os.networkInterfaces();
-        for (var i in interfaces) {
-            if (dsn == false) {
-                var net = interfaces[i];
-                for (var j in net) {
-                    if (net[j].family == 'IPv4' && net[j].address != '127.0.0.1') {
-                        dsn = net[j].mac;
-                        console.log('dsn = ' + dsn)
-                        break;
-                    }
-                }
-            }
-        }
-
-        if (!dsn) {
-            console.log("Failed to find MAC address for Alexa registration");
-        }
-        this.sessionId = super.createUuid;
-        console.log('This id = ' + this.sessionId)
-
-        crypto.randomBytes(REG_NUM_BYTES, function (err, regCodeBuffer) {
-            if (err) {
-                console.log("failed on generate bytes", err);
-                //callback(error("InternalError", "Failure generating code", 500));
-                return;
-            } else {
-                this.regCode = regCodeBuffer.toString('hex');
-                console.log('This id = ' + this.sessionId)
-
-                auth.state.sessionIds.push(this.sessionId);
-                auth.state.regCodeToSessionId[this.regCode] = this.sessionId;
-                auth.state.sessionIdToDeviceInfo[this.sessionId] = {
-                    productId: productId,
-                    dsn: dsn,
-                };
-
-                fs.writeFile('./cookie.js', JSON.stringify(auth.state));
-                console.log('Reg Code:' + this.regCode + ' | Session Id:' + this.sessionId)
-                //auth.register(regCode, res, function (response) {
-                //    console.log('STATUS:' + response.statusCode);
-                //    console.log('Response:' + JSON.stringify(response.headers));
-                //    console.log('Access Token: ' + response.statusCode);
-                //});
-            }
-        });
+        self.register(target);
     }
 
     get config() {
@@ -736,11 +691,11 @@ class PiskyAlexa extends Thing {
         return context;
     }
 
-    get sessionId(){
+    get sessionId() {
         return this._sessionId;
     }
 
-    set sessionId(value){
+    set sessionId(value) {
         this._sessionId = value;
     }
 

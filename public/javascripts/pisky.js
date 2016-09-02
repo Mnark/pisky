@@ -159,10 +159,10 @@ Thing.prototype.view = function (thing) {
     }
 };
 
-Thing.prototype.command = function (name) {
+Thing.prototype.command = function (name, data) {
     //        for (var index = 0; index < self.commands.length; index++) {
     console.log("command found");
-    this.callback(this.id(), name);
+    this.callback(this.id(), name, data);
     return false;
     //        }
 };
@@ -376,7 +376,19 @@ var Bot = function Bot(data, socket) {
                         self.socket.on('updatechat', function (username, data) {
                             $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
                         });
+                        
+                        self.socket.on('view', function (data) {
+                            console.log('Client side view id:' + data.id + ' target:' + data.target + ' url: ' + data.url)
 
+                           var win = window.open(data.url, data.target);
+                            if (win) {
+                                //Browser has allowed it to be opened
+                                win.focus();
+                            } else {
+                                //Browser has blocked it
+                                alert('Please allow popups for this website');
+                            }
+                        });
                         console.log(JSON.stringify(data));
                         //$("#logIn").dialog('close');
                         $.mobile.changePage("#");

@@ -1,6 +1,6 @@
 {
   "name": "pisky-alexa",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -21,7 +21,6 @@
     "multipartser": "^1.0.2",
     "node-aplay": "^1.0.3",
     "pisky": "~0.1.0",
-    "pisky-parser": "*",
     "speaker": "^0.3.0", 
     "http2": "*"
   }

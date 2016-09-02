@@ -441,7 +441,6 @@ class Host extends Thing{
                         } else {
                             var listened = self.things[index].emit('command', data);
                             console.log("Listeners:" + listened);
-                            break;
                         }
                         return;
                     };
@@ -496,7 +495,8 @@ class Host extends Thing{
                 console.log("Already knew about thing: " + thing.name + ' id: ' + thing.id);
                 return false;
             } else {
-                if (thing instanceof Thing || thing instanceof Host) {
+                console.log('I am a Pisky Thing? ' + Thing.constructor.prototype.isPrototypeOf(thing.constructor))
+                if (Thing.constructor.prototype.isPrototypeOf(thing.constructor)) {
                     console.log("adding thing: " + thing.name + ' id: ' + thing.id);
                     thing.on('alert', (directive) => {
                         console.log("thing ALERTED: " + thing.name + ' id: ' + thing.id);
@@ -506,11 +506,15 @@ class Host extends Thing{
                         console.log("thing STATUS: " + thing.name + ' id: ' + thing.id);
                         self.io.emit('status', {id: thing.id, states: status});
                     })
+                    thing.on('view', (data) => {
+                        console.log ('emitting view back to client' )
+                        self.io.emit('view', { id: thing.id, url: data.url, target: data.target });
+                    })
                     self.things.push(thing);
                 } else {
                     var a = new Thing(thing);
                     self.things.push(a);
-                    console.log("adding NEW thing: " + thing.name + " socket: " + a.socket);
+                    console.log("WARNING: adding NEW thing: " + thing.name + " socket: " + a.socket);
                 };
                 
                 //Get the homepage of the thing that has connected
@@ -747,20 +751,21 @@ class Host extends Thing{
                 self.io.emit('status', device);
             });
             socket.on('command', function (data) {
-                //console.log('Got a command message for ' + JSON.stringify(data.id) + ' Searching ' + self.things.length + ' things');
+                console.log('Got a command message for ' + JSON.stringify(data.id) + ' Searching ' + self.things.length + ' things');
                 for (var index = 0; index < self.things.length; index++) {
                     if (self.things[index].id == data.id) {
                         //console.log('self.things[index].emit :' + self.things[index].emit);
                         if (self.things[index].socket) {
-                            //console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
+                            console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
                             self.io.emit('command', data);
                             //socket.broadcast.to(self.things[index].socket).emit('command', data);
                             //self.io.sockets[self.things[index].socket].emit(data);
                             //self.things[index].socket.emit(data);
                         } else {
-                            //console.log("self.things[index].name: " + self.things[index].name);
+                            console.log("self.things[index].name: " + self.things[index].name);
                             var listened = self.things[index].emit('command', data);
-                            //console.log("Listeners:" + listened);
+                            console.log("Listeners:" + listened);
+                            break;
                         }
                         return;
                     };
@@ -858,17 +863,17 @@ class Host extends Thing{
 
 //Host.prototype = new Thing({});
 
-Host.prototype.count = function (objectName) {
-    switch (objectName.toLowerCase()) {
-        case 'users':
-            return this.users.length;
+//Host.prototype.count = function (objectName) {
+//    switch (objectName.toLowerCase()) {
+//        case 'users':
+//            return this.users.length;
 
-        case 'things':
-            return this.users.length;
-        default:
-            return this.users.length;
-    }
-};
+//        case 'things':
+//            return this.users.length;
+//        default:
+//            return this.users.length;
+//    }
+//};
 
 util.inherits(Controller, EventEmitter);
 //util.inherits(Thing, EventEmitter);

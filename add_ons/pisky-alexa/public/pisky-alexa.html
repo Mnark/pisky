@@ -33,8 +33,10 @@
             </div>
 
             <div id="registration" class="ui-content">
-                <a href="/register" target="_blank" data-role="button" data-icon="delete" data-iconpos="top">Register</a>
-                <iframe id="regpanel" name="regpanel" src="https://www.npmjs.com/package/node-uuid">
+                <!--a href="/register" target="_blank" data-role="button" data-icon="delete" data-iconpos="top">Register</a-->
+                <a href="#" target="_blank" data-role="button" data-icon="delete" data-iconpos="top"  data-bind="click: function(){ command('register', '_blank')}">Register</a>
+                <iframe id="regpanel" name="regpanel">
+                <div> You must register this product with Amazon before use. </div>
                 </iframe>
             </div>
 
