@@ -1,0 +1,95 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div>
+        <h3>
+            <img src="" data-bind="attr: {src: img}" style="width: 64px" /> Pisky RF433
+        </h3>
+        <div data-role="tabs">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#control" data-ajax="false">Devices</a></li>
+                    <li><a href="#configuration" data-ajax="false">Configuration</a></li>
+                </ul>
+            </div>
+
+            <div id="control" class="ui-content">
+                <div data-role="collapsible-set">
+                    <div data-role="collapsible">
+                        <h6 data-icon="plus">
+                            Add New Device
+                        </h6>
+                        <p>
+                            <form data-bind="submit: add">
+                                <label> Device Name: <input name="name"></input></label>
+
+                                <label> Description: <input name="description"></input></label>
+
+                                <label> Image: <input name="img" type="text" value="images/device.png"></input><img src="images/device.png"> </label>
+                                <button data-bind="click: function(){ command('Listen')}">Detect Device</button>
+                                <label> codeOn: <input data-bind="codeOn: device" type="number" min="0"></input></label>
+                                <label> codeOff: <input data-bind="codeOff: device" type="number" min="0"></input></label>
+                                <label> pulseLength: <input data-bind="pulseLength: device" type="number" min="0"></input></label>
+
+
+                                <label> Device #: <input name="device" type="number" min="0"></input></label>
+                                <label> Channel #: <input name="channel" type="number" min="0"></input></label>
+                                <input type="submit" value="Add Device"></input>
+                            </form>
+                        </p>
+                    </div>
+                    <!-- ko foreach: things -->
+                    <div data-role="collapsible">
+                        <h6 data-icon="carat-r">
+                            <img width="40px" data-bind="attr: {src: img}" />
+                            <span data-bind="text: name"></span>
+                        </h6>
+                        <p>
+                            <form>
+                                <label> Device Name: <input data-bind="value: name"></input></label>
+                                <label> Description: <input data-bind="value: description"></input></label>
+                                <label> Image: <input data-bind="value: img" type="text""></input><img src="images/device.png"> </label>
+                                <label> codeOn: <input data-bind="codeOn: device" type="number" min="0"></input></label>
+                                <label> codeOff: <input data-bind="codeOff: device" type="number" min="0"></input></label>
+                                <label> pulseLength: <input data-bind="pulseLength: device" type="number" min="0"></input></label>
+                                <label for="typeSelector"> Switch Type: 
+                                    <select id="typeSelector">
+                                        <option > type 1 </option>
+                                        <option > type 2 </option>
+                                        <option > type 3 </option>
+                                        <option > type 4 </option>
+                                    </select>
+                                </label>
+                                <label> Device #: <input data-bind="value: device" type="number" min="0"></input></label>
+                                <label> Channel #: <input data-bind="value: channel" type="number" min="0"></input></label>
+                                <button data-bind="click: function(){ command('Delete')}">Remove Device</button>
+                                <button data-bind="click: function(){ command('Update')}">Update Device</button>
+                            </form>
+                        </p>
+                    </div>
+                    <!-- /ko -->
+                </div>
+            </div>
+            <div id="configuration" class="ui-content">
+                <form data-bind="submit: update">
+                    <label> Device Name: <input name="name" data-bind="value: name"></input></label>
+
+                    <label> Description: <input name="description" data-bind="value: description"></input></label>
+
+                    <label> Image: <input name="img" type="text" data-bind="value: img"></input><img src="images/rf433.png"> </label>
+
+                    <label> Transmit Pin #: <input name="transmitPin" data-bind="value: transmitPin" type="number" min="0"></input></label>
+                    <label> Recieve Pin #: <input name="recievePin" data-bind="value: recievePin" type="number" min="0"></input></label>
+                    <input type="submit" value="Update"></input>
+                </form>
+            </div>
+            <div>
+                <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+            </div>
+        </div>
+</body>
+
+</html>

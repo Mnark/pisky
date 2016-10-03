@@ -41,12 +41,15 @@
 
         <div id="system" class="ui-body-d tablist-content">
             <h3>System</h3>
-            <!--table border="1" style="border-style: solid; text-align: center" data-bind="foreach: states">
-                <tr>
-                    <td data-bind="text: name"></td>
-                    <td data-bind="text: value"></td>
-                </tr>
-            </table-->
+            <form data-bind="submit: update">
+                <label> Host Name: <input name="name" data-bind="value: name"></input></label>
+
+                <label> Description: <input name="description" data-bind="value: description"></input></label>
+
+                <label> Image: <input name="img" type="text" data-bind="value: img"></input><img src="images/home.png"> </label>
+
+                <input type="submit" value="Update"></input>
+            </form>
         </div>
     </div>
     <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>

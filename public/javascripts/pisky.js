@@ -1,122 +1,6 @@
-function Device(data, callback) {
-    var self = this;
-    self.id = data.id;
-    self.name = data.name;
-    self.description = data.description;
-    self.type = data.type;
-    self.visible = (data.visible || true);
-    self.image = data.image || "/images/device.png";
-    switch (self.type ? self.type.toString().toUpperCase() : 'DEVICE') {
-        case 'SWITCH':
-            break;
-        case 'SCALE':
-            self.minValue = data.minValue;
-            self.maxValue = data.maxValue;
-            self.precision = data.precision;
-            break;
-        default:
-    }
-    self.channel = data.channel;
-    self.device = data.device;
-    self.family = data.family;
-    self.callback = callback;
-    self.value = ko.observable(data.value);
-    self.controllerId = data.controllerId;
-    self.commands = data.commands || [""];
-
-    self.states = ko.observableArray(data.states || ["", ""]);
-    self.state = ko.computed(function () {
-        switch (self.type ? self.type.toString().toUpperCase() : 'DEVICE') {
-            case 'SWITCH':
-                return self.value() == 1 ? "On" : "Off";
-
-            default:
-                return self.value();
-        }
-    });
-
-
-    self.toggle = function () {
-        if (self.value() == "0") {
-            self.callback(self.id, self.controllerId, 'turnOn', 1);
-        } else {
-            self.callback(self.id, self.controllerId, 'turnOff', 0);
-        }
-
-    };
-    self.increment = function () {
-        if (self.type == 'SCALE') {
-            var currentValue = parseFloat(self.value());
-            if (currentValue + self.precision <= self.maxValue) {
-                self.value(currentValue + self.precision);
-            }
-        }
-    };
-
-    self.decrement = function () {
-        if (self.type == 'SCALE') {
-            var currentValue = parseFloat(self.value());
-            if (currentValue - self.precision >= self.minValue) {
-                self.value(currentValue - self.precision);
-            }
-        }
-    };
-
-    self.commandText = ko.computed(function () {
-        return self.commands[0] + ' ' + self.name + ' ' + (self.value() == 0 ? self.states()[1] : self.states()[0]);
-    }, this);
-
-    self.setValue = function (value) {
-        if (self.type == 'SCALE') {
-            if (value > self.maxValue) {
-                value = self.maxValue;
-            };
-            if (value < self.minValue) {
-                value = self.minValue;
-            };
-            value = Math.round(value / self.precision) * self.precision;
-        };
-        if (value != self.value()) {
-            self.callback(self.id, self.controllerId, 'turnOn', value);
-        }
-        self.value(value);
-    };
-
-    //    self.value.subscribe(function (newValue) {
-    //        self.callback(self.id, self.controllerId, 'turnOn', newValue);
-    //    }, this);
-};
-
-var Controller = function (data, callback) {
-    var self = this;
-    self.id = data.id;
-    self.name = data.name;
-    self.description = data.description;
-    self.control = data.control;
-    self.image = data.image || "/images/controller.png";
-    self.visible = (data.visible || true);
-    self.html = data.html;
-    self.callback = callback;
-    self.devices = ko.observableArray();
-    $.each(data.devices, function (key, device) {
-        self.devices.push(new Device(device, self.callback));
-    });
-    self.view = function (controller) {
-        if ($("#guestPage")) {
-            $("#guestPage").load(self.html, function () {
-                ko.cleanNode(document.getElementById("guestPage"));
-                ko.applyBindings(controller, document.getElementById("guestPage"));
-                $("#guestPage").dialog({ width: "100pc", height: "100%" });
-                $.mobile.changePage("#guestPage");
-            });
-        } else {
-            console.log("Guest Page not supported");
-        }
-    };
-};
-
 var Thing = function Thing(data, callback) {
     self = this;
+    self.initialised = false;
     self.callback = callback;
     self.devices = ko.observableArray();
     for (var property in data) {
@@ -146,26 +30,53 @@ var Thing = function Thing(data, callback) {
 }
 Thing.prototype = new EventEmitter();
 
+Thing.prototype.add = function(form){
+    var str = $(form).serializeArray()
+    this.callback(this.id(), 'Add', str);
+        return false;
+};
+
+Thing.prototype.update = function(form){
+    var str = $(form).serializeArray()
+    this.callback(this.id(), 'Update', str);
+    return false;
+};
+
 Thing.prototype.view = function (thing) {
-    if ($("#guestPage")) {
-        $("#guestPage").load(thing.html(), function () {
-            ko.cleanNode(document.getElementById("guestPage"));
-            ko.applyBindings(thing, document.getElementById("guestPage"));
-            $("#guestPage").dialog({ width: "100%", height: "100%" });
-            $.mobile.changePage("#guestPage");
-        });
+    //console.log('view called on thing with ' + thing.action() + ' action' )
+    if (thing.action() == 'command') {
+        this.command('TOGGLE'); 
     } else {
-        console.log("Guest Page not supported");
+        // action == 'navigate''
+        if ($("#guestPage")) {
+            if (!thing.initialised){
+                for (var i=0;i < thing.things().length;i++){
+                    var t = thing.callback(thing.id(), 'getThing',thing.things()[i]().id )
+                   thing.things()[i](t) 
+                }
+                thing.initialised = true;
+            }
+            $("#guestPage").load(thing.html(), function () {
+                ko.cleanNode(document.getElementById("guestPage"));
+                var t = bot.getThing(thing.id())
+                ko.applyBindings(t, document.getElementById("guestPage"));
+                $("#guestPage").dialog({ width: "100%", height: "100%" });
+                $.mobile.changePage("#guestPage");
+            });
+        } else {
+            console.log("Guest Page not supported");
+        }
     }
 };
 
 Thing.prototype.command = function (name, data) {
-    //        for (var index = 0; index < self.commands.length; index++) {
-    console.log("command found");
+    console.log("command " + name + " found with data: " + JSON.stringify(data));
     this.callback(this.id(), name, data);
     return false;
+    //        for (var index = 0; index < self.commands.length; index++) {
     //        }
 };
+
 
 Thing.prototype.setState = function (name, value) {
     console.log('setting state')
@@ -189,41 +100,34 @@ Thing.prototype.setState = function (name, value) {
 
 var Bot = function Bot(data, socket) {
     var self = this;
-    self.id = data.id;
-    self.name = ko.observable(data ? data.name : '');
-    self.img = data ? data.img : '';
+    //self.id = data.id;
+    //self.name = ko.observable(data ? data.name : '');
+    //self.img = data ? data.img : '';
 
-    if (typeof (data.heartbeat) == "number") {
-        self.heartbeat = data.heartbeat;
-    };
+    //if (typeof (data.heartbeat) == "number") {
+    //    self.heartbeat = data.heartbeat;
+    //};
 
-    self.geo = new Object();
-    self.geo.longitude = -3.0092;
-    self.geo.latitude = 51.5884;
-    self.geo.heading = 61.78;
-    self.geo.pitch = -0.76;
-    self.geo.velocity = 0;
-    self.geo.latlon = new LatLon(self.geo.latitude, self.geo.longitude);
+    //self.geo = new Object();
+    //self.geo.longitude = -3.0092;
+    //self.geo.latitude = 51.5884;
+    //self.geo.heading = 61.78;
+    //self.geo.pitch = -0.76;
+    //self.geo.velocity = 0;
+    //self.geo.latlon = new LatLon(self.geo.latitude, self.geo.longitude);
 
-    self.devices = ko.observableArray();
-    self.controllers = ko.observableArray();
+    //self.devices = ko.observableArray();
+    //self.controllers = ko.observableArray();
     //    self.viewModel = ko.mapping.fromJS(data);
     //    self.devices = ko.observableArray(data ? data.devices : '');
 
-    self.lanip = data ? data.lanip : '';
-    self.lanport = data ? data.lanport : '';
-    self.driver = ko.observable(data ? data.driver : '');
+    //self.lanip = data ? data.lanip : '';
+    //self.lanport = data ? data.lanport : '';
+    //self.driver = ko.observable(data ? data.driver : '');
 
-    if (data.controllers) {
-        $.each(data.controllers, function (key, controller) {
-            var newController = new Controller(controller, function (id, controllerId, command, value) {
-                self.socket.emit('send', { botId: self.id, controllerId: controllerId, deviceId: id, command: command, value: value });
-            });
-            self.controllers.push(newController);
-        });
-    };
 
-    self.things = ko.observableArray(data ? data.things : null);
+    self.things = ko.observableArray();
+
     self.getThing = function (id) {
         for (var i = 0; i < self.things().length; i++) {
             if (self.things()[i].id() == id) {
@@ -253,29 +157,30 @@ var Bot = function Bot(data, socket) {
                         self.socket = io.connect(self.url, { query: { username: event.target['un'].value, password: event.target['pw'].value, image: 'imagecode' } });
                         self.socket.on('init', function (id) {
                             self.id = id;
+                            self.things.removeAll();
                         });
 
                         // listener, whenever the server emits 'controllers', this updates the local devices on the page
-                        self.socket.on('controllers', function (controllers) {
-                            for (var i = 0; i < controllers.length; i++) {
-                                if (self.controllers.indexOf(function (id) { return item.id == id; }) > -1) {
+                        //self.socket.on('controllers', function (controllers) {
+                        //    for (var i = 0; i < controllers.length; i++) {
+                        //        if (self.controllers.indexOf(function (id) { return item.id == id; }) > -1) {
 
-                                } else {
-                                    var newController = new Controller(controllers[i], function (id, controllerId, command, value) {
-                                        self.socket.emit('send', { botId: self.id, controllerId: controllerId, deviceId: id, command: command, value: value });
-                                    });
-                                    self.controllers.push(newController);
-                                }
-                            };
+                        //        } else {
+                        //            var newController = new Controller(controllers[i], function (id, controllerId, command, value) {
+                        //                self.socket.emit('send', { botId: self.id, controllerId: controllerId, deviceId: id, command: command, value: value });
+                        //            });
+                        //            self.controllers.push(newController);
+                        //        }
+                        //    };
 
-                            //$('ul').each(function (index, list) {
-                            try {
-                                $('#devs').listview('refresh');
-                            } catch (err) {
-                                $('#devs').trigger('create');
-                            }
+                        //$('ul').each(function (index, list) {
+                        //    try {
+                        //        $('#devs').listview('refresh');
+                        //    } catch (err) {
+                        //        $('#devs').trigger('create');
+                        //    }
 
-                        });
+                        //});
 
                         self.socket.on('status', function (status) {
                             if (status.botId == self.id) {
@@ -299,13 +204,6 @@ var Bot = function Bot(data, socket) {
                                     }
                                 }
                             }
-                            //ko.mapping.fromJS(status, viewModel);
-                            //        for (var i = 0; i < status.devices.length; i++) {
-                            for (var i = 0; i < self.devices().length; i++) {
-                                if (status.id == self.devices()[i].id) {
-                                    self.devices()[i].state(status.state);
-                                }
-                            }
 
                             for (var i = 0; i < self.things().length; i++) {
                                 for (var k = 0; k < self.things()[i].devices().length; k++) {
@@ -316,6 +214,10 @@ var Bot = function Bot(data, socket) {
 
                             }
                         });
+
+                        self.socket.on('message', function (message) {
+                            alert('Got a message:' + message)
+                        })
 
                         self.socket.on('updatechat', function (username, data) {
                             $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
@@ -362,9 +264,14 @@ var Bot = function Bot(data, socket) {
                                 if (self.things.indexOf(function (id) { return things[i].id == id; }) > -1) {
                                 } else {
                                     var newThing = new Thing(things[i], function (id, command, data) {
-                                        self.socket.emit('command', { id: id, command: command, value: data });
+                                        if( command == 'getThing'){
+                                            return self.getThing(data)
+                                        }else{
+                                            self.socket.emit('command', { socketId: self.socket.id, id: id, command: command, value: data });
+                                        }
                                     });
                                     self.things.push(newThing);
+
                                 }
                             }
                         });
@@ -376,19 +283,7 @@ var Bot = function Bot(data, socket) {
                         self.socket.on('updatechat', function (username, data) {
                             $('#conversation').append('<b>' + username + ':</b> ' + data + '<br>');
                         });
-                        
-                        self.socket.on('view', function (data) {
-                            console.log('Client side view id:' + data.id + ' target:' + data.target + ' url: ' + data.url)
 
-                           var win = window.open(data.url, data.target);
-                            if (win) {
-                                //Browser has allowed it to be opened
-                                win.focus();
-                            } else {
-                                //Browser has blocked it
-                                alert('Please allow popups for this website');
-                            }
-                        });
                         console.log(JSON.stringify(data));
                         //$("#logIn").dialog('close');
                         $.mobile.changePage("#");

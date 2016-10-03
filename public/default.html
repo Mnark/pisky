@@ -1,11 +1,10 @@
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <title>Pisky Net</title>
-    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-    <link rel=”icon” href=”/favicon.ico” type=”image/icon” />
+    <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
     <meta name="viewport" content="width=device-width" />
     <link href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet" />
     <link href="/stylesheets/site.css" rel="stylesheet" />
@@ -23,15 +22,13 @@
     <script src="/javascripts/bot.js"></script>
     <script src="/javascripts/vox.js"></script>
     <style>
-        video,
-        canvas {
+        video, canvas {
             /*margin-left: 230px;
             margin-top: 120px;*/
             position: relative;
         }
     </style>
 </head>
-
 <body>
 
     <div id="indexPage" data-role="page" data-theme="a">
@@ -50,31 +47,9 @@
             <h1>Controllers</h1>
             <div>
                 <div data-role="collapsible-set" data-theme="b" data-content-theme="d">
-                    <div data-role="collapsible" data-bind="foreach: controllers">
-                        <img src="#" data-bind="attr: {src: image}" />
-                        <h2 data-bind="text: name">Filtered list</h2>
-                        <ul data-role="listview" data-bind="foreach: devices" data-divider-theme="d">
-                            <li>
-                                <a href="index.html" data-bind="text: name"></a>
-                            </li>
-                        </ul>
-                    </div>
-
-
                 </div>
             </div>
             <div>
-                <ul data-role="listview" data-inset="true" data-bind="foreach: controllers">
-                    <li>
-                        <a href="#" class="ui-grid-a">
-                            <img src="/images/home.png" data-bind="attr: {src: image}" />
-                            <span class="ui-block-a" data-bind="text: name"></span>
-                        </a>
-                        <a href="#" data-icon="arrow-d">
-                            Details
-                        </a>
-                    </li>
-                </ul>
             </div>
             <a href="#" class="vox" data-role="button" data-icon="delete">Add Device</a>
             <a href="#" class="vox" data-rel="close" data-role="button" data-mini="true" data-icon="delete">Close</a>
@@ -102,37 +77,6 @@
         </div>
 
         <div class="property-page">
-            <div>
-                <!--<label for="devs"> Devices <i>you control</i></label>-->
-                <ul id="devs" data-role="listview" data-inset="true">
-                    <!--<li>
-                        <a>
-                            <img src="/images/bot.png" />
-                            <div data-bind="text: name"></div>
-                        </a>
-                    </li>-->
-                    <!-- ko foreach: controllers -->
-                    <!-- ko if: visible -->
-                    <li>
-                        <a href="#" data-bind="click: view">
-                            <img data-bind="attr: {src: image}" />
-                            <div data-bind="text: name"></div>
-                        </a>
-                    </li>
-                    <!-- /ko -->
-                    <!-- ko foreach: devices -->
-                    <!-- ko if: visible -->
-                    <li>
-                        <a data-bind="click: toggle">
-                            <img data-bind="attr: {src: image}" />
-                            <div data-bind="text: name"></div>
-                        </a>
-                    </li>
-                    <!-- /ko -->
-                    <!-- /ko -->
-                    <!-- /ko -->
-                </ul>
-            </div>
             <div>
                 <!--<label for="things"><i>These are not the droids you were looking for...</i></label>-->
                 <ul id="things" data-role="listview" data-inset="true" data-bind="foreach: things">
@@ -171,7 +115,7 @@
             </div>
 
             <div data-role="footer" data-position="fixed" data-theme="b">
-                <p style="float: right">&copy; 2016 - <a href="http://piskynet.azurewebsites.net" data-role="button"><span class="vox">Pi Sky Net</span> Productions</a></p>
+                <p style="float: right">&copy; 2015 - <a href="http://piskynet.azurewebsites.net" data-role="button"><span class="vox">Pi Sky Net</span> Productions</a></p>
             </div>
         </div>
     </div>
@@ -215,5 +159,4 @@
     </div>
     <!--<script src="/main.js"></script>-->
 </body>
-
 </html>

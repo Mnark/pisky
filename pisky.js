@@ -1,4 +1,4 @@
-﻿//"use strict";
+﻿"use strict";
 var util = require('util');
 var EventEmitter = require('events').EventEmitter;
 var express = require('express');
@@ -7,253 +7,511 @@ var https = require('https');
 var bodyParser = require('body-parser');
 var fs = require('fs');
 var uuid = require('node-uuid');
+var os = require('os');
 
-function generateUUID() {
-    var d = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        var r = (d + Math.random() * 16) % 16 | 0;
-        d = Math.floor(d / 16);
-        return (c == 'x' ? r : (r & 0x3 | 0x8)).toString(16);
-    });
-    return uuid;
-};
+class Config extends EventEmitter {
+    constructor(options) {
+        super()
+        if (!options) { var options = [] }
+        this.params = []
+        this.things = []
 
-class Config {
-    constructor(data){
-        var os = require('os');
-        this.description = data.description || 'A piskybot'
-        this.bottype = 'piskybot';
-        this.img = data.img || '';
-        this.url = '';
-        this.interval = parseInt(data.interval) || 50000;
-        this.name = data.name || os.hostname();
-        this._controllers = [];
-    }
-    get controllers (){
-        var tempControllers = new Array();
-        for (var i = 0; i < this._controllers.length; i++) {
-            tempControllers.push(this._controllers[i].getConfig());
+        this.setParam = function (name, value) {
+            for (var i = 0; i < this.params.length; i++) {
+                if (this.params[i].name == name) {
+                    //console.log('Parameter ' + name + ' has value : ' + this.params[i].value + ' Setting to: ' + value)
+                    if (this.params[i].value != value) {
+                        this.params[i].value = value
+                        this.emit('CONFIGCHANGED', { "id": this.getParam('id'), "name": name, "value": value })
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+            this.params.push({ "name": name, "value": value })
+            this.emit('CONFIGCHANGED', { "id": this.getParam('id'), "name": name, "value": value })
+            return true
         }
-        return tempControllers;
+
+        this.getParam = function (name) {
+            for (var i = 0; i < this.params.length; i++) {
+                if (this.params[i].name == name) {
+                    return this.params[i].value
+                }
+            }
+            return undefined;
+        }
+
+        this.addThing = function (id, requirement) {
+            for (var i = 0; i < this.things.length; i++) {
+                if (this.things[i].id == id) {
+                    this.things[i].requirement = requirement
+                    return false;
+                }
+            }
+            this.things.push({ "id": id, "requirement": requirement })
+            return true;
+        }
+
+        this.removeThing = function (id) {
+            for (var i = 0; i < this.things.length; i++) {
+                if (this.things[i].id == id) {
+                    this.things.splice(i, 1)
+                    this.emit('CONFIGCHANGED', { "id": this.getParam('id') })
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        for (var param in options) {
+            //console.log('param = ' + options[param].name + ' Value: ' + options[param].value)
+            //if (param == 'id' || param == 'name' || param == 'description' || param == 'img' || param == 'url' || param == 'bottype' || param == 'action' || param == 'html') {
+            //this.setParam(param, options[param])
+            this.params.push({ "name": options[param].name, "value": options[param].value })
+            //}
+        }
+        //console.log('>>>>>>>Config passed is' + JSON.stringify(options))
+        //if (options.things) {
+        //    for (var i = 0; i < options.things.length; i++) {
+        //console.log('>>>>>>>Adding thing to Config')
+        //        this.addThing(options.things[i].id, options.things[i].requirement)
+        //    }
+        // }
     }
-};
-//Config.prototype.getControllers = function () {
-//    var tempControllers = new Array();
-//    for (var i = 0; i < this.controllers.length; i++) {
-//        tempControllers.push(this.controllers[i].getConfig());
-//    }
-//    return tempControllers;
-//};
-Config.prototype.loadConfig = function () {
-  
-};
-Config.prototype.saveConfig = function () {
-    //    var fs = require("fs");
-    //    fs.writeFile(self.name + ".config.json", JSON.stringify(self), "utf8", function (err) {
-    //        if (err) {
-    //            console.log("Error saving configuration ") + err.message;
-    //        }
-    //        console.log("Configuration saved");
-    //    });    
-};
 
-var Device = function (controller, data) {
-    var self = this;
-    self.id = data.id || generateUUID();
-    self.controllerId = controller.id;
-    self.control = controller.control;
-    self.name = data.name;
-    self.description = data.description;
-    self.image = data.image || "/images/device.png";
-    self.visible = (data.visible || true);
-    
-    switch (data.type ? data.type.toString().toUpperCase(): 'DEVICE') {
-        case 'SWITCH':
-            self.type = 'SWITCH';
-            self.commands = ['Turn', 'Switch', 'Put'];
-            self.states = ['on', 'off'];
-            break;
-        case 'SCALE':
-            self.type = 'SCALE';
-            self.commands = ['Faster', 'Slower', 'Speed Up', 'Slow Down'];
-            self.states = [0, 1];
-            self.valueType = data.valueType;
-            self.minValue = data.minValue;
-            self.maxValue = data.maxValue;
-            self.precision = data.precision;
-            break;
-        default:
-            self.type = 'PISKY';
+    getModel() {
+        var rtn = { 'things': this.things }
+        for (var param in this.params) {
+            rtn[this.params[param].name] = this.params[param].value
+        }
+        return rtn
     }
-    
-    self.channel = data.channel;
-    self.device = data.device;
-    self.family = data.family;
-    self.switchcode = data.switchcode;
-    self.value = data.value;
-    self.callback = controller.callback;
-    
-    self.interval = data.interval || null;
-    
-    self.read = function () {
-        return self.value;
-    };
-    
-    self.setValue = function (value) {
-        self.value = value;
-        if (typeof (self.callback) == "function") {
-            self.callback(self.controllerId, self.id, self.value);
-        } else {
-            console.log("Device " + self.name + " has no callback method");
-        };
-    };
-    
-    //self.updateStatus = function () {
-    //    console.log("device (" + self.name + ")updating status");
-    //    self.callback(self.controllerId, self.id, self.value);
-    //    if (typeof (self.interval) == "number") {
-    //        setInterval(self.updateStatus, self.interval);
-    //    }
-    //};
-    //self.updateStatus();
-};
 
-var Controller = function (data, callback) {
-    var self = this;
-    self.id = data.id || generateUUID();
-    self.name = data.name;
-    self.description = data.description;
-    self.control = data.control;
-    self.image = data.image || "/images/controller.png";
-    self.visible = (data.visible || true);
-    self.devices = [];
-    self.callback = callback
-    self.pulse = data.pulse;
-    self.heartbeat = function () {
-        self.emit('pulse', {}); //emit the event back to the bot
-    };
-    if (typeof (self.pulse) == "number") {
-        setInterval(self.heartbeat, self.pulse);
-    };
-    
-    self.getConfig = function () {
-        return {
-            id: self.id,
-            name: self.name, 
-            description: self.description, 
-            image : self.image,
-            visible: self.visible,
-            devices: self.devices,
-    //            html: self.control.html
-        };
-    };
+    stringify() {
+        return JSON.stringify(this);
+    }
 
-};
+    getParameter(name) {
+        return this.getParam(name)
+    }
 
-class Thing extends EventEmitter{
-    constructor(data, callback) {
-        //console.log('Constructor of Thing called for ' + data.name)
+    setParameter(name, value) {
+        this.setParam(name, value)
+    }
+}
+
+class State extends EventEmitter {
+    constructor() {
+        super()
+        this._states = []
+
+        this.setState = function (name, value) {
+            for (var i = 0; i < this._states.length; i++) {
+                if (this._states[i].name == name) {
+                    this._states[i].value = value
+                    this.emit('STATECHANGED', { "name": name, "value": value })
+                    return true
+                }
+            }
+            this._states.push({ "name": name, "value": value })
+            this.emit('STATESET', { "name": name, "value": value })
+            return true
+        }
+
+        this.getState = function (name) {
+            for (var i = 0; i < this._states.length; i++) {
+                if (this._states[i].name == name) {
+                    return this._states[i].value
+                }
+            }
+            return undefined
+        }
+    }
+
+    getStates() {
+        return this._states
+    }
+
+    getState(name) {
+        return this.getParam(name)
+    }
+
+    setState(name, value) {
+        this.setParam(name, value)
+    }
+}
+
+class Thing extends EventEmitter {
+    constructor(profile, callback) {
+        //console.log('Constructor of Thing called for ' + JSON.stringify(profile))
         super();
-        var self = this;
-        this.callback = callback;
-        this.id = data.id || uuid.v1();
-        this.socket = data.socket;
-        this._name = data.name || "Anonymous";
-        this.description = data.description || "";
-        this.visible = (data.visible || true);
-        this.image = data.image || "/images/bot.png";
-        this.img = data.img || "/images/bot.png";
-        this.html = data.html || "thing.html";
-        this.states = data.states || [];
-        this.imageProviders = data.imageProviders || new Array();
-        this.videoProviders = data.videoProviders || new Array();
-        this.audioProviders = data.audioProviders || new Array();
-        this._appget = [];
-        this._appuse = [];
-    }
-    
-    get config () {
-        return {
-            id: this.id,
-            name: this._name, 
-            description: this.description, 
-            visible: this.visible,
-            image : this.image,
-            img : this.img,
-            html: this.html,
-            socket: this.socket,
-            states: this.states,
-            imageProviders: this.imageProviders,
-            videoProviders: this.videoProviders,
-            audioProviders: this.audioProviders
-        };
-    }
-
-    set host (value) {
-        this.callback = value;
-    }
-
-    get name () { return this._name}
-    set name (value) { this._name = value}
-
-    get createUuid () { return uuid.v1()}
-
-    getState (name){
-        for (var i = 0 ; i < this.states.length; i++){
-            if ( this.states[i].name == name){
-                return this.states[i].value;
+        if (!profile) {
+            var profile = { params: [], things: [] }
+        } else {
+            if (!profile.params) {
+                profile.params = []
+            }
+            if (!profile.things) {
+                profile.things = []
             }
         }
-        return;
+        this.config = new Config(profile.params);
+        if (this.config.getParameter('id') == undefined) { this.config.setParameter('id', uuid.v1()) }
+        if (this.config.getParameter('html') == undefined) { this.config.setParameter('html', "thing.html") }
+        if (this.config.getParameter('img') == undefined) { this.config.setParameter('img', "images/thing.png") }
+        if (this.config.getParameter('action') == undefined) { this.config.setParameter('action', "naviagte") }
+
+        this.config.on('CONFIGCHANGED', function (config) {
+            //console.log('CONFIGCHANGED for Thing id: ' + config.id + ' parameter: ' + config.name + ' value: ' + config.value)
+            self.emit('CONFIGCHANGED', config)
+        })
+
+        this.state = new State();
+        //this.state.on('STATECHANGED', function (state) {
+        //    this.emit('STATECHANGED', state)
+        //})
+
+        this.callback = callback
+        //        this.socket = data.socket;
+        //        this.visible = (data.visible || true);
+        this.visible = true
+        //        this.image = data.image || "/images/bot.png";
+        //        this.img = data.img || "/images/bot.png";
+
+        this.states = [];
+        //this.pulse = data.pulse;
+        this.imageProviders = []
+        this.videoProviders = []
+        this.audioProviders = []
+        this._appget = []
+        this._appuse = []
+        this.things = []
+        var self = this
+
+        this.heartbeat = function () {
+            this.emit('pulse', this.state); //emit the event back to the host
+        }
+
+        this.getThing = function (id) {
+            //console.log('Searching for ' + id + ' in ' + this.things.length + ' things')
+            for (var i = 0; i < this.things.length; i++) {
+                if (this.things[i].id == id) {
+                    return this.things[i];
+                }
+                for (var j = 0; j < this.things[i].things.length; j++) {
+                    var a = this.things[i].getThing(id)
+                    if (a) {
+                        return a
+                    }
+                }
+            }
+            return false;
+        }
+
+        this.addThing = function (thing, addToConfig) {
+            console.log('Pisky Thing add thing called for: ' + thing.id)
+            if (addToConfig != false) { addToConfig = true }
+            if (this.getThing(thing.id)) {
+                console.log("Request to add thing: " + thing.name + ' to: ' + this.name + ' : Already exists');
+                return false;
+            } else {
+                if (thing instanceof Thing) {
+                    //if (thing.prototype != undefined && Thing.constructor.prototype.isPrototypeOf(thing.constructor)) {
+                    console.log("Request to add Pisky Thing: " + thing.name + ' to: ' + this.name);
+                    thing.on('alert', (directive) => {
+                        //                        console.log("thing ALERTED: " + thing.name + ' id: ' + thing.id);
+                        self.io.emit('alert', directive);
+                    })
+                    thing.on('status', (status) => {
+                        console.log("thing STATUS: " + thing.name + ' id: ' + thing.id);
+                        self.io.emit('status', { id: thing.id, states: status });
+                    })
+                    thing.on('view', (data) => {
+                        //                        console.log('emitting view back to client')
+                        self.io.emit('view', { id: thing.id, url: data.url, target: data.target });
+                    })
+                    thing.on('CONFIGCHANGED', (config) => {
+                        self.emit('CONFIGCHANGED', config)
+                    })
+                    thing.on('message', (message) => {
+                        //console.log( this.name + ' saw a message: ' + message)
+                        self.emit('message', message)
+                    })
+                    self.things.push(thing);
+                    if (addToConfig) {
+                        this.config.addThing(thing.id, thing.constructor.name)
+                    }
+                } else {
+                    console.log("Request to add thing: " + thing.name + ' to: ' + this.name + ' WARNING: New Thing created');
+                    var a = new Thing(thing);
+                    self.things.push(a);
+                };
+
+                if (Array.isArray(thing._appget)) {
+                    for (var index = 0; index < thing._appget.length; index++) {
+                        this._appget.push(thing._appget[index])
+                        //if ((typeof thing._appget[index] === "object") && (thing._appget[index] !== null)) {
+                        //                        console.log("Adding _appget for " + thing._appget[index].path);
+                        //    self.app.get(thing._appget[index].path, thing._appget[index].callback);
+                        //}
+                    }
+                };
+
+                if (Array.isArray(thing._appuse)) {
+                    for (var index = 0; index < thing._appuse.length; index++) {
+                        this._appuse.push(thing._appuse[index])
+                    }
+                };
+
+                if (Array.isArray(thing.things)) {
+                    for (var i = 0; i < thing.things.length; i++) {
+                        self.addThing(thing.things[i], false);
+                    }
+                }
+                self.emit('CONFIGCHANGED', { "id": this.id })
+                return true;
+            };
+
+        }
+
+        this.removeThing = function (id) {
+            console.log('* Remove * ' + id + ' from ' + this.id)
+            for (var i = 0; i < this.things.length; i++) {
+                if (this.things[i].id == id) {
+                    this.things.splice(i, 1);
+                    this.config.removeThing(id)
+                    return true
+                }
+            }
+            return false
+        }
+
+        this.getModel = function () {
+            var rtn = []
+            var a = this.config.getModel()
+            a.state = this.state.getStates()
+            rtn.push(a)
+
+            for (var index = 0; index < this.things.length; index++) {
+                var m = this.things[index].getModel()
+                rtn = rtn.concat(m)
+            }
+            return rtn
+        }
+
+        if (typeof (this.pulse) == "number") {
+            setInterval(this.heartbeat, this.pulse);
+        }
+
+        //console.log('Thing ' + this.name + ' has ' + profile.things.length + ' things')
+        for (var i = 0; i < profile.things.length; i++) {
+            console.log('Loading thing')
+            var thingProfile = this.callback(profile.things[i].id)
+            var a, b
+            if (profile.things[i].requirement.includes('PiskyRF433')) {
+                a = require(__dirname + "/../../add_ons/pisky-rf433")
+                b = new a(thingProfile, this.callback)
+            } else {
+                b = new Thing(thingProfile, this.callback)
+            }
+            //            b.on('command', function(data){
+            //
+            //            })
+
+            b.on('CONFIGCHANGED', function (config) {
+                console.log('Thing CONFIGCHANGED ')
+                //var thing = this.getThing(config.id)
+                //this.save(thing)
+            })
+            console.log(">>> Initial loading of thing id: " + b.id + ' name: ' + b.name)
+            this.addThing(b)
+            //if (this.addThing(b)) {
+            //    this.save(b)
+            //}
+        }
+
     }
 
-    setState (name, value){
-        for (var i = 0 ; i < this.states.length; i++){
-            if ( this.states[i].name == name){
-                this.states[i].value = value;
-                return;
+    //set host(value) {
+    //    this.callback = value
+    // }
+
+    get id() { return this.config.getParameter('id') }
+
+    get name() { return this.config.getParameter('name') }
+    set name(value) { this.config.setParameter('name', value) }
+
+    get html() { return this.config.getParameter('html') }
+    set html(value) { this.config.setParameter('html', value) }
+
+    get img() { return this.config.getParameter('img') }
+    set img(value) { this.config.setParameter('img', value) }
+
+    get type() { return this.config.getParameter('type') }
+    set type(value) { this.config.setParameter('type', value) }
+
+    get description() { return this.config.getParameter('description') }
+    set description(value) { this.config.setParameter('description', value) }
+
+    get action() { return this.config.getParameter('action') }
+    set action(value) { this.config.setParameter('action', value) }
+
+    get createUuid() { return uuid.v1() }
+
+    getModel() {
+        return this.getModel()
+    }
+
+    getParameter(name) {
+        return this.config.getParameter(name);
+    }
+
+    setParameter(name, value) {
+        return this.config.setParameter(name, value);
+    }
+
+    getState(name) {
+        return this.state.getState(name);
+    }
+
+    setState(name, value) {
+        return this.state.setState(name, value);
+    }
+
+    getThing(id) {
+        this.getThing(id)
+    }
+
+    addThing(thing) {
+        console.log("Thing addThing called")
+        return this.addThing(thing)
+    }
+
+    getConfig() {
+        return this.config.stringify()
+    }
+
+}
+
+class Host extends Thing {
+    constructor(options) {
+        var load = function (id) {
+            console.log('********************************************')
+            console.log('*** Loading Configuration  for ' + id + '***')
+            if (!id) {
+                console.log('*** Reading active profile ***')
+                try {
+                    var data = JSON.parse(fs.readFileSync(__dirname + "/.config/pisky.config.json", { 'encoding': 'utf8' }))
+                    //console.log('Profile read: ' + JSON.stringify(data))
+                    if (data.id) {
+                        id = data.id;
+                    }
+                } catch (e) {
+                    console.log('No active profile found... Creating new profile ***')
+                }
+            }
+            if (id) {
+                try {
+                    var data2 = fs.readFileSync(__dirname + "/.config/" + id + ".config.json", { 'encoding': 'utf8' })
+                    //console.log('Profile read: ' + data2)
+                    return JSON.parse(data2);
+                } catch (e) {
+                    console.log('Error loading configuration:' + e)
+                    return { params: [], things: [] };
+                }
+            }
+            return { params: [], things: [] };
+        }
+
+        if (!options) { var options = {} }
+        var profile = load(options.id)
+        //       for (var i = 0; i < profile.params.length; i++) {
+        //           var name = profile.params[i].name;
+        //           if (!options[name]) {
+        //               options[name] = profile.params[i].value
+        //           }
+        //       }
+        //       options.things = profile.things
+
+        //        if (options.action) {
+        //            
+        //            options.action = "navigate"
+        //        }
+        //        if (!options.html) {
+        //            options.html = "host.html"
+        //        }
+        //        if (!options.img) {
+        //            options.img = "/images/home.png"
+        //        }
+
+        super(profile, load);
+        if (this.getParameter('name') == undefined) { this.setParameter('name', 'Unknown') }
+        if (this.getParameter('description') == undefined) { this.setParameter('description', 'Unknown') }
+        if (this.getParameter('action') == undefined) { this.setParameter('action', 'navigate') }
+        if (this.getParameter('html') == undefined) { this.setParameter('html', 'host.html') }
+        if (this.getParameter('img') == undefined) { this.setParameter('img', '/images/home.png') }
+
+        this.on('CONFIGCHANGED', function (config) {
+            var a = this.getThing(config.id)
+            if (a) {
+                this.save(a)
+            } else {
+                console.log("Request to save config of unknown thing: id " + config.id)
+            }
+
+        })
+
+        this.on('message', function (message) {
+            console.log('host got message ' + message)
+            //send everyone a message for now
+            self.io.emit('message',message)
+        })
+
+        this.save = function (thing) {
+            console.log('*******Saving profile for id: ' + thing.id)
+            //console.log('Profile: ' + thing.getConfig())
+            fs.writeFile(__dirname + "/.config/" + thing.id + ".config.json", thing.getConfig(), "utf8", function (err) {
+                if (err) {
+                    console.log("Error saving configuration ") + err.message
+                }
+                console.log("Configuration saved")
+            });
+            for (var index in thing.things) {
+                this.save(thing.things[index])
             }
         }
-        this.states.push({ name: name, value: value });
-        return;
-    }
-};
 
-class Host extends Thing{
-    constructor(data) {
-        super(data);
         var self = this;
-        this.name = data.name || "Anonymous";
-        self.img = data.img || "/images/home.png";
-        self.os = require('os');
-        self.geo = new Object();
+        self.geo = {};
         self.geo.longitude = -3.0092;
         self.geo.latitude = 51.5884;
         self.geo.heading = 61.78;
         self.geo.pitch = -0.76;
         self.geo.velocity = 0;
 
-        self.app = null;
-        if (data.app) {
-            self.app = data.app
+        this.app = null;
+        if (options.app) {
+            this.app = options.app
         } else {
-            self.app = express();
+            this.app = express();
         };
-        self.port = data.port || 80;
-        self.httpsPort = data.httpsPort || 443;
-        
-        self.server = http.createServer(self.app);
+        self.port = options.port || 80;
+        self.httpsPort = options.httpsPort || 443;
+
+        self.server = http.createServer(this.app);
         self.httpsServer = https.createServer({
-            key: fs.readFileSync(data.key ? data.key : __dirname + '/certs/2b71b8b9-a69a-4d55-b5d6-60a9b044a065.private.pem'),
-            cert: fs.readFileSync(data.cert ? data.cert : __dirname + '/certs/2b71b8b9-a69a-4d55-b5d6-60a9b044a065.public.pem')
-        }, self.app);
-        
+            key: fs.readFileSync(options.key ? options.key : __dirname + '/certs/2b71b8b9-a69a-4d55-b5d6-60a9b044a065.private.pem'),
+            cert: fs.readFileSync(options.cert ? options.cert : __dirname + '/certs/2b71b8b9-a69a-4d55-b5d6-60a9b044a065.public.pem')
+        }, this.app);
+
         self.server.listen(self.port);
         self.httpsServer.listen(self.httpsPort);
-        
-        self.app.use(bodyParser.json());
-        
-        self.app.get("/", function (req, res) {
+
+        this.app.use(bodyParser.json());
+
+        this.app.get("/", function (req, res) {
             //console.log("Requesting root file");
             if (req.secure) {
                 console.log("Sending file :" + __dirname + '/public/default.html');
@@ -264,8 +522,8 @@ class Host extends Thing{
             }
 
         });
-        
-        self.app.post('/login', function (req, res) {
+
+        this.app.post('/login', function (req, res) {
             //self.passport.authenticate('local', {
             //    successRedirect: '/loginSuccess',
             //    failureRedirect: '/loginFailure'
@@ -273,52 +531,56 @@ class Host extends Thing{
             if (req.body.image) {
                 var base64Data = req.body.image.replace(/^data:image\/png;base64,/, "");
                 try {
-            //           self.fs.mkdirSync("//sharecenter/PiUsers/" + req.body.user);
+                    //           self.fs.mkdirSync("//sharecenter/PiUsers/" + req.body.user);
                 } catch (e) {
                     if (e.code != 'EEXIST') {
                         throw e;
                     }
                 }
-            //        self.fs.writeFile("//sharecenter/PiUsers/" + req.body.user + "/" + generateUUID() + ".png", base64Data, 'base64', function (err) {
-            //            console.log(err);
-            //        });
+                //        self.fs.writeFile("//sharecenter/PiUsers/" + req.body.user + "/" + generateUUID() + ".png", base64Data, 'base64', function (err) {
+                //            console.log(err);
+                //        });
             }
             self.users.push({ name: req.body.user });
             res.send('login');
         });
-        
-        self.app.use(express.static('public'));
-        self.app.use(express.static(__dirname + '/public'));
-        
+
+        //self.app.use(express.static('public'));
+        this.app.use(express.static(__dirname + '/public'));
+        for (var i in this._appuse) {
+            console.log('Adding ' + this._appuse[i] + ' to list of directories for ' + this.name)
+            this.app.use(express.static(this._appuse[i]));
+        }
+
         self.io = require('socket.io')
-        .listen(self.httpsServer.listen(self.httpsPort))
-        .use(function (socket, next) {
-            //console.log("Query: ", socket.handshake.query);
-            //// return the result of next() to accept the connection.
-            //if (socket.handshake.query.username == "Mark") {
-            return next();
-            //}
-            //// call next() with an Error if you need to reject the connection.
-            //next(new Error('Authentication error'));
-        });
-        
+            .listen(self.httpsServer.listen(self.httpsPort))
+            .use(function (socket, next) {
+                //console.log("Query: ", socket.handshake.query);
+                //// return the result of next() to accept the connection.
+                //if (socket.handshake.query.username == "Mark") {
+                return next();
+                //}
+                //// call next() with an Error if you need to reject the connection.
+                //next(new Error('Authentication error'));
+            });
+
         // usernames which are currently connected to the chat
         self.users = [];
-        self.things = [];
+
         // rooms which are currently available in chat
         self.rooms = ['openchat', '@bots'];
-        
-        self.interval = data.interval || 60000;
-        
+
+        self.interval = options.interval || 60000;
+
         self.status = new Object();
-        self.status.user = data.user || '';
+        self.status.user = options.user || '';
         self.status.datetime = new Date();
         self.status.scale = 1;
         self.status.direction = 0;
         self.status.acceleration = 0;
         self.status.poistion = 0;
         self.status.devices = [];
-        
+
         //Load or Create Configuration
         //    try {
         //        self._config = require("." + self.os.hostname() + ".config.json");
@@ -334,7 +596,7 @@ class Host extends Thing{
         //    } catch (err) {
         //       console.log("Previous configuration not loaded: " + err.message);
         //console.log("Creating new configuration.");
-        self._config = new Config(data);
+        //self._config = new Config(data);
         //       self._config = new Object();
         //       self._config.description = data.description || 'A piskybot'
         //       self._config.bottype = 'piskybot';
@@ -343,22 +605,22 @@ class Host extends Thing{
         //       self._config.interval = parseInt(data.interval) || 50000;
         //       self._config.controllers = [];
         //   }
-        
+
         //    self._config.controllers = function (){
         //        var tempControllers = new Array();
         //        for (var i = 0; i < self._config.controllers.length; i++){
-        
+
         //            tempControllers.push(self._config.controllers[i].getConfig());
         //       }
         //        return tempControllers;
         //    };
-        
-        self._config.country = "Unknown";
-        self._config.city = "Unknown";
-        self._config.wanip = "Unknown";
-        self._config.lanip = "Unknown";
-        self._config.lanport = self.port;
-        
+
+        //self.config.setParameter('country', "Unknown");
+        //self._config.city = "Unknown";
+        //self._config.wanip = "Unknown";
+        //self._config.lanip = "Unknown";
+        //self._config.lanport = self.port;
+
         //Find geo location from ip address
         //http.get("http://www.telize.com/geoip", function (res) {
         //    res.on("data", function (chunk) {
@@ -370,28 +632,28 @@ class Host extends Thing{
         //}).on('error', function (e) {
         //    console.log("Got error reading geoip: " + e.message);
         //});
-        
+
         self.networks = [];
         //self.country = "";
         //self.city = "";
-        
-        self.networkInterfaces = self.os.networkInterfaces();
+
+        self.networkInterfaces = os.networkInterfaces();
         for (var i in self.networkInterfaces) {
-            if (self._config.lanip == "Unknown") {
+            if (self.config.getParameter('lanip') == undefined) {
                 if (self.networkInterfaces.hasOwnProperty(i)) {
                     var net = self.networkInterfaces[i];
                     for (var j = 0; j < net.length; j++) {
                         if (net[j].family == 'IPv4' && net[j].address != '127.0.0.1') {
-                            self._config.lanip = net[j].address;
+                            self.config.setParameter('lanip', net[j].address);
                             break;
                         }
                     }
                 }
             }
         }
-        
-        self.lanurl = "http://" + self._config.lanip + ":" + self._config.lanport + "/";
-        
+
+        self.lanurl = "http://" + self.config.getParameter('lanip') + ":" + self.config.getParameter('lanport') + "/";
+
         self.addNetwork = function (name, url, callbackurl) {
             var ioc = require('socket.io-client');
             var socket = ioc.connect(url, { query: { id: self.id, username: self.name, image: 'imagecode' } });
@@ -402,9 +664,9 @@ class Host extends Thing{
                     socket.emit('addthing', { config: self.things[thing].getConfig(), socket: socket.id });
                 }
             });
-            
+
             socket.on('disconnect', function () {
-                    
+
                 if (socket.handshake.query.username) {
                     console.log('disconnect: ' + socket.handshake.query.username);
                     for (var i = 0; i < self.users.length; i++) {
@@ -448,182 +710,49 @@ class Host extends Thing{
                 //            console.log('Not for a thing, so telling the app');
                 self.emit(data.command, data.data);
             });
-                
+
             socket.on('updatechat', function (username, data) {
-            //            console.log("Got chat from " + username + " :" + data);
-            //            self.io.emit('updatechat', username, data);
+                //            console.log("Got chat from " + username + " :" + data);
+                //            self.io.emit('updatechat', username, data);
             });
-            
+
             socket.on('send', function (event) {
                 console.log("Got send and raising back to the app");
                 self.emit('send', event); //emit the event back to the bot
-                    //socket.broadcast.to(event.socketId).emit('send', event);
-                    //socket.emit('send', event);
-                    //self.io.sockets.emit('send', event);
+                //socket.broadcast.to(event.socketId).emit('send', event);
+                //socket.emit('send', event);
+                //self.io.sockets.emit('send', event);
             });
-            
+
             socket.on('status', function (event) {
                 console.log("Got status and raising back to the app");
                 self.emit('status', event); //emit the event back to the bot
             });
-            
+
             socket.on('things', function (things) {
                 console.log("Got things back from " + name);
                 for (thing in things) {
-                    self.addThing(new Thing(things[thing])) ? console.log("Added " + things[thing].name + ' id: ' + things[thing].id)  : console.log("Already knew about " + things[thing].name);
+                    self.addThing(new Thing(things[thing])) ? console.log("Added " + things[thing].name + ' id: ' + things[thing].id) : console.log("Already knew about " + things[thing].name);
                 }
                 //self.emit('status', event); //emit the event back to the bot
             });
-            
+
             self.networks.push({ name: name, url: url, callbackurl: callbackurl, socket: socket });
         };
-        
-        self.getDevice = function (id) {
-            for (var i = 0; i < self._config.controllers.length; i++) {
-                for (var j = 0; j < self._config.controllers[i].devices.length; j++) {
-                    if (self._config.controllers[i].devices[j].id == id) {
-                        return self._config.controllers[i].devices[j];
-                    }
-                }
-            }
-            return false;
-        };
-        
-        self.addThing = function (thing) {
-            console.log("Request to add thing: " + thing.name + ' id: ' + thing.id + ' thing instanceof Thing: ' + (thing instanceof Thing) + ' thing instanceof Host: ' + (thing instanceof Host));
-            if (self.getThing(thing.id)) {
-                console.log("Already knew about thing: " + thing.name + ' id: ' + thing.id);
-                return false;
-            } else {
-                console.log('I am a Pisky Thing? ' + Thing.constructor.prototype.isPrototypeOf(thing.constructor))
-                if (Thing.constructor.prototype.isPrototypeOf(thing.constructor)) {
-                    console.log("adding thing: " + thing.name + ' id: ' + thing.id);
-                    thing.on('alert', (directive) => {
-                        console.log("thing ALERTED: " + thing.name + ' id: ' + thing.id);
-                        self.io.emit('alert', directive);
-                    })
-                    thing.on('status', (status) => {
-                        console.log("thing STATUS: " + thing.name + ' id: ' + thing.id);
-                        self.io.emit('status', {id: thing.id, states: status});
-                    })
-                    thing.on('view', (data) => {
-                        console.log ('emitting view back to client' )
-                        self.io.emit('view', { id: thing.id, url: data.url, target: data.target });
-                    })
-                    self.things.push(thing);
-                } else {
-                    var a = new Thing(thing);
-                    self.things.push(a);
-                    console.log("WARNING: adding NEW thing: " + thing.name + " socket: " + a.socket);
-                };
-                
-                //Get the homepage of the thing that has connected
-                if (thing.config) {
-                    //self.http.get(thing.config.url, function (res) {
-                    //    thing.config.homepage = res;
-                    //}).on('error', function (e) {
-                    //    console.log("Homepage not available: " + e.message);
-                    //}).end();
-                };
 
-                if (Array.isArray(thing._appget)) {
-                    for (var index = 0; index < thing._appget.length; index++) {
-                        if ((typeof thing._appget[index] === "object") && (thing._appget[index] !== null)) {
-                            //                        console.log("Adding _appget for " + thing._appget[index].path);
-                            self.app.get(thing._appget[index].path, thing._appget[index].callback);
-                        }
-                    }
-                };
-                console.log("Adding _appuse for " + thing._appuse.length);
-                if (Array.isArray(thing._appuse)) {
-                    for (var index = 0; index < thing._appuse.length; index++) {
-                       // if ((typeof thing._appuse[index] === "object") && (thing._appuse[index] !== null)) {
-                            console.log("Adding _appuse for " + thing._appuse[index]);
-
-                            self.app.use(express.static(thing._appuse[index]));
-                       // }
-                    }
-                };
-                if (Array.isArray(thing.things)) {
-                    for (var i = 0; i < thing.things.length; i++) {
-                        self.addThing(thing.things[i]);
-                    }
-                }
-                return true;
-            };
-
-        };
-        
-        self.getThing = function (id) {
-            for (var i = 0; i < self.things.length; i++) {
-                if (self.things[i].id == id) {
-                    return self.things[i];
-                }
-            }
-            return false;
-        };
-        
-        self.createDevice = function (controller, data) {
-            var a = new Device(controller, data);
-            for (var i = 0; i < self._config.controllers.length; i++) {
-                if (self._config.controllers[i].id == controller.id) {
-                    self._config.controllers[i].devices.push(a);
-                    break;
-                }
-            }
-            self.status.devices.push(a);
-            //self.saveConfig();
-            return a;
-        };
-        
-        self.updateDevice = function (id, property, value) {
-            //        console.log("Pisky: updateDevice id:" + id + " property: " + property + " value :" + value);
-            var dev = self.getDevice(id);
-            if (dev) { dev.setValue(value) };
-            
-            for (var i = 0; i < self.status.devices.length; i++) {
-                if (self.status.devices[i].id == id) {
-                    self.status.devices[i][property] = value;
-                    console.log("Pisky: updateDevice : emmiting status message to direct clients");
-                    //tell direct connections the new value
-                    //self.io.sockets.emit("status", self.status.devices[i]);
-                    //tell networks the new value
-                    for (var j = 0; j < self.networks.length; j++) {
-                        //self.networks[i].socket.broadcast.emit("status", self.status);
-                        self.networks[j].socket.emit("status", self.status.devices[i]);
-                    }
-                }
-            }
-        };
-        
         self.callback = function (controllerId, id, value) {
             //self.io.sockets.emit("status", {
             self.io.emit("status", {
                 botId: self.id, controllerId: controllerId, deviceId: id, value: value
             });
-            
+
             for (var i = 0; i < self.networks.length; i++) {
                 self.networks[i].socket.emit("status", {
                     botId: self.id, controllerId: controllerId, deviceId: id, value: value
                 });
             };
         };
-        
-        self.createController = function (data, obj) {
-            if (typeof obj == 'function') {
-                data.control = new obj();
-            }
-            var a = new Controller(data, self.callback);
-            self._config.controllers.push(a);
-            self._config.saveConfig();
-            if (data.control) {
-                if ((typeof data.control._appget === "object") && (data.control._appget !== null)) {
-                    self.app.get(data.control._appget.path, data.control._appget.callback);
-                }
-            }
-            return a;
-        }
-        
+
         self.updateStatus = function () {
             for (var i = 0; i < self.status.devices.length; i++) {
                 if (self.status.devices[i].control) {
@@ -650,13 +779,13 @@ class Host extends Thing{
                 self.io.emit('status', self.status);
             }
         }
-        
-        setInterval(self.updateStatus, self._config.interval);
-        
+
+        setInterval(self.updateStatus, self.config.getParameter('interval'));
+
         self.alert = function (message) {
             self.io.emit('alert', { 'message': message, 'from': self.name })
         }
-        
+
         self.io.on('connection', function (socket) {
             console.log("connection from: " + socket.handshake.query.username);
             socket.on('send', function (event) {
@@ -703,7 +832,7 @@ class Host extends Thing{
                     //    //    socket.emit('status', device);
                     //    //});
                     //});
-                    
+
                     // 
                     //nsp.emit('hi', 'everyone!');
                     // store the name in the socket session for this client
@@ -714,14 +843,14 @@ class Host extends Thing{
                     //usernamess[thing.name] = thing.name;
                     //self.users.push(thing);
                     //                self.rooms.push(thing);
-                    
+
                     // join your rooms
                     socket.join('openchat');
                     socket.broadcast.to('openchat').emit('updatechat', thing.name + " has come online.");
                     socket.join('@bots');
                     //socket.broadcast.to('@bots').emit('updatethings', self.things);
                     socket.join(thing.name);
-                    
+
                     // echo to client they've connected
                     socket.emit('updatechat', 'SERVER', 'you have connected to ' + thing.name);
                     socket.broadcast.emit('updatechat', thing.name, ' Online');
@@ -752,26 +881,39 @@ class Host extends Thing{
             });
             socket.on('command', function (data) {
                 console.log('Got a command message for ' + JSON.stringify(data.id) + ' Searching ' + self.things.length + ' things');
-                for (var index = 0; index < self.things.length; index++) {
-                    if (self.things[index].id == data.id) {
-                        //console.log('self.things[index].emit :' + self.things[index].emit);
-                        if (self.things[index].socket) {
-                            console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
-                            self.io.emit('command', data);
-                            //socket.broadcast.to(self.things[index].socket).emit('command', data);
-                            //self.io.sockets[self.things[index].socket].emit(data);
-                            //self.things[index].socket.emit(data);
-                        } else {
-                            console.log("self.things[index].name: " + self.things[index].name);
-                            var listened = self.things[index].emit('command', data);
-                            console.log("Listeners:" + listened);
-                            break;
-                        }
-                        return;
-                    };
+                var t = self.getThing(data.id)
+                if (t) {
+                    if (t.socket) {
+                        console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
+                        self.io.emit('command', data);
+                    } else {
+                        console.log("Command is for: " + t.name + ' from user socket ');
+                        var listened = t.emit('command', data);
+                        console.log(t.name + " was Listening?: " + listened);
+                    }
                 }
+                return;
+
+                //for (var index = 0; index < self.things.length; index++) {
+                //    if (self.things[index].id == data.id) {
+                //        //console.log('self.things[index].emit :' + self.things[index].emit);
+                //        if (self.things[index].socket) {
+                //            console.log('Got a command message for thing (' + self.things[index].name + '), so emmitting to socket:' + self.things[index].socket);
+                //            self.io.emit('command', data);
+                //socket.broadcast.to(self.things[index].socket).emit('command', data);
+                //self.io.sockets[self.things[index].socket].emit(data);
+                //self.things[index].socket.emit(data);
+                //        } else {
+                //            console.log("Command is for: " + self.things[index].name);
+                //            var listened = self.things[index].emit('command', data);
+                //            console.log(self.things[index].name + " was Listening?: " + listened);
+                //            break;
+                //        }
+                //        return;
+                //    };
+                //}
                 //            console.log('Not for a thing, so telling the app');
-                self.emit(data.command, data.data);
+                //self.emit(data.command, data.data);
             });
             socket.on('switchRoom', function (newroom) {
                 console.log('switchRoom');
@@ -787,7 +929,7 @@ class Host extends Thing{
                 socket.broadcast.to(newroom).emit('updatechat', 'SERVER', socket.username + ' has joined this room');
                 socket.emit('updaterooms', self.rooms, newroom);
             });
-            socket.on('config', function (bot) {      
+            socket.on('config', function (bot) {
             });
             socket.on('alert', function (message) {
                 console.log("Got an alert from " + message.from);
@@ -824,59 +966,91 @@ class Host extends Thing{
                             console.log(socket.username + " logged out!");
                         }
                     }
-                //                console.log("System: A thing called has disconnected:" + JSON.stringify(socket.username))
+                    //                console.log("System: A thing called has disconnected:" + JSON.stringify(socket.username))
                 }
 
             });
-            //console.log("Emmiting message");
-            socket.to(socket.id).emit('message', 'You are connected to' + self._config.name);
+
+            socket.to(socket.id).emit('message', 'You are connected to' + self.name);
             //console.log("Emmiting init");
             socket.emit('init', self.id);
-            //console.log("Emmiting controllers");
-            socket.emit('controllers', self._config.controllers);
-            console.log("Emmiting " + self.things.length + " things");
-            //self.things.forEach(function (thing) {console.log(' thing.name:' + thing.name)}) 
-            //socket.to(socket.id).emit('things', self.things);
-            var newThings = [];
-            for (var index = 0; index < self.things.length; index++) {
-                newThings.push(self.things[index].config);
-            }
-            //newThings.forEach(function (thing) {console.log(' thing.name:' + thing.name)}) 
-            socket.emit('things', newThings);
-            //socket.emit('things', self.things);
-            //console.log("Emmiting users");
+            socket.emit('things', self.getModel());
             socket.emit('users', self.users);
-            //console.log("Emmiting status");
             socket.emit('status', self.status);
         });
-        
-        self.states = [{ 'name': 'Operating System', 'value': self.os.arch() }
-                , { 'name': 'CPUs', 'value': self.os.cpus().length }
-                , { 'name': 'Platform', 'value': self.os.platform() }
-                , { 'name': 'Operating System', 'value': self.os.type() }];
-        
+
+        self.states = [{ 'name': 'Operating System', 'value': os.arch() }
+            , { 'name': 'CPUs', 'value': os.cpus().length }
+            , { 'name': 'Platform', 'value': os.platform() }
+            , { 'name': 'Operating System', 'value': os.type() }];
+
         //var a = new Thing(self);
         //a.set('users', self.count('users'));
-        self.addThing(self);
-    };
-};
+        //self.addThing(self);
+        //var createThing = function (id, requirement) {
+        //    var a
+        //    if (requirement.includes('PiskyRF433')) {
+        //        a = require(__dirname + "/../../add_ons/pisky-rf433")
+        //    } else {
+        //        a = require(requirement)
+        //    }
+        //    var profile = load(id)
+        //console.log("Thing Config =" + JSON.stringify(thingConfig))
+        //var b = new a({"id":self.config.things[i].id})
+        //    return new a(profile, load)
+        //}
 
-//Host.prototype = new Thing({});
+        //console.log('>>>> Initial config for host has ' + this.config.things.length + ' things')
+        //       for (var i = 0; i < this.config.things.length; i++) {
+        //var a
+        //if (this.config.things[i].requirement.includes('PiskyRF433')) {
+        //    a = require(__dirname + "/../../add_ons/pisky-rf433")
+        //} else {
+        //    a = require(this.config.things[i].requirement)
+        //}
+        //var thingConfig = load(self.config.things[i].id)
+        //console.log("Thing Config =" + JSON.stringify(thingConfig))
+        //var b = new a(thingConfig)
+        //           var b = createThing(this.config.things[i].id, this.config.things[i].requirement)
+        //           b.on('CONFIGCHANGED', function (config) {
+        //                console.log('CONFIGCHANGED Saving profile @: ' + __dirname + "/.config/" + config.id + ".config.json")
+        //               var thing = this.getThing(config.id)
+        //               this.save(thing)
+        //           })
+        //           console.log("Initial loading of thing is id: " + b.id)
+        //           if (super.addThing(b)) {
+        //               this.save(b)
+        //           }
+        //       }
+        //this.save(self)
+        //fs.writeFile(__dirname + "/.config/pisky.config.json", '{"id":"' + self.id + '"}', "utf8", function (err) {
+        //    if (err) {
+        //        console.log("Error saving default profile ") + err.message
+        //    }
+        //    console.log('Inititial profile @: ' + __dirname + "/.config/pisky.config.json saved.")
+        //});
+    }
 
-//Host.prototype.count = function (objectName) {
-//    switch (objectName.toLowerCase()) {
-//        case 'users':
-//            return this.users.length;
+    addThing(thing) {
+        console.log('Pisky Host add thing called for' + thing.id)
+        if (super.addThing(thing)) {
+            this.save(thing)
+        }
+    }
 
-//        case 'things':
-//            return this.users.length;
-//        default:
-//            return this.users.length;
-//    }
-//};
+    saveProfile() {
+        this.save(this)
 
-util.inherits(Controller, EventEmitter);
-//util.inherits(Thing, EventEmitter);
-//util.inherits(Host, EventEmitter);
+        fs.writeFile(__dirname + "/.config/pisky.config.json", '{"id":"' + this.id + '"}', "utf8", function (err) {
+            if (err) {
+                console.log("Error saving default profile ") + err.message
+            }
+            console.log('Inititial profile @: ' + __dirname + "/.config/pisky.config.json saved.")
+        });
+    }
+}
+
 module.exports = Host;
 module.exports.Thing = Thing;
+
+

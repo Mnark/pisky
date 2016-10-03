@@ -2,6 +2,10 @@ class camera {
     constructor() {
         const _videostream = 'videostream.cgi';
         const _controller = 'decoder_control.cgi';
+        const _cameraController = 'camera_control.cgi';
+        const _getCameraParams = 'get_camera_params.cgi';
+
+        const _set_OSD = 'set_osd.cgi';
         const _status = 'get_status.cgi';
         const _snapshot = 'snapshot.cgi'; // Warning, this returned invalid headers (LFLF instead of CRLFCRLF)
         const _user = 'loginuse';

@@ -1,0 +1,23 @@
+{
+  "name": "pisky-rf433",
+  "version": "0.0.1",
+  "description": "Pisky Add-on for a 433Mhz rf controller",
+  "main": "pisky-rf433.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Pisky",
+    "Add-on"
+  ],
+  "dependencies": {
+    "rpi-433": "*",
+    "rcswitch": "*",
+    "pisky": "~0.1.0"
+  },
+  "files": [
+    "public"
+  ],
+  "author": "",
+  "license": "ISC"
+}

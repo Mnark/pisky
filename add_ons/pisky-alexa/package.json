@@ -21,7 +21,6 @@
     "multipartser": "^1.0.2",
     "node-aplay": "^1.0.3",
     "pisky": "~0.1.0",
-    "speaker": "^0.3.0", 
     "http2": "*"
   }
 }

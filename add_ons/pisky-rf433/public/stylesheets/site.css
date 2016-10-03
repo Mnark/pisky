@@ -1,0 +1,458 @@
+﻿body, input, button {
+    font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+    font-size: 1.2em;
+}
+
+body {
+    background-color: #fff;
+    color: #333;
+    max-width: 980px; /*Remove this to make it full screen*/
+    margin: 1em auto;
+}
+
+button, input[type=submit] {
+    border: 1px solid #dedede;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+.content-wrapper {
+    margin: 0 auto;
+    max-width: 960px;
+    padding-right: 10px;
+    padding-left: 10px;
+}
+
+/*#region Header */
+
+header {
+    margin: 0 .7em;
+    position: relative;
+    z-index: -1;
+}
+
+    header p {
+        font-size: 2.5em;
+        margin: 0;
+    }
+
+#userSettings {
+    float: right;
+}
+
+    #userSettings > form:before {
+        content: ' | ';
+    }
+
+    #userSettings form {
+        display: inline;
+    }
+
+#menu {
+    list-style-type: none;
+    padding: 0;
+}
+
+    #menu li {
+        display: inline-block;
+    }
+
+    #menu li:not(:first-child) {
+        margin-left: .8em;
+    }
+
+/*#endregion */
+
+/*#region forms */
+
+#changePasswordForm input,
+#registerForm input,
+#loginForm input {
+    border: 1px solid #dedede;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+    border-radius: 5px;
+}
+
+    #changePasswordForm input[type=text], #changePasswordForm input[type=password],
+    #registerForm input[type=text], #registerForm input[type=password],
+    #loginForm input[type=text], #loginForm input[type=password] {
+        background: white;
+        width: 220px;
+    }
+
+#loginForm input[type=checkbox]{
+    border: none;
+}
+
+#changePasswordForm input[type=submit] {
+    margin-bottom: .8em;
+}
+
+#registerPanel{
+    display: none;
+    position: relative;
+    float: left;
+    text-align: left;
+    padding: 25px;
+}
+
+#loginPanel {
+    display: block;
+    position: relative;
+    float: left;
+    text-align: left;
+    padding: 25px;
+    width: 600px;
+}
+
+#registerPanel h2,
+#loginPanel h2 {
+    padding-bottom: .5em;
+    margin: 0;
+}
+
+#registerPanel a,
+#loginPanel a {
+    color: navy;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#registerPanel p,
+#loginPanel p {
+    clear: both;
+}
+
+#localLoginPanel {
+    border-right: solid 2px #c8c8c8;
+    float: left;
+    width: 45%;
+    text-align: left;
+}
+
+#socialLoginPanel {
+    margin-left: 40px;
+    float: left;
+    width: 45%;
+    text-align: left;
+}
+
+    #socialLoginPanel h2 {
+        margin-bottom:  5px;
+    }
+
+#socialLoginList button {
+    margin-bottom: 12px;
+}
+
+#externalLogins {
+    text-align: left;
+    padding-left: 25px;
+}
+
+fieldset {
+    border: none;
+    margin: 0 auto;
+    padding: 0 20px;
+    text-align: left;
+    display: inline;
+}
+
+    fieldset legend {
+        display:block;
+    }
+
+    fieldset label:not(.checkbox) {
+        display: block;
+        text-align: left;
+    }
+
+    fieldset ol {
+        padding: 0;
+        margin: 0 0 8px 0;
+        list-style: none;
+    }
+
+        fieldset ol li {
+            padding-bottom: 5px;
+        }
+
+ol.round {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+/*#endregion */
+
+#main-content {
+    min-height: 400px;
+    text-align: center;
+}
+
+/*#region info and errors */
+.error {
+    float: none;
+    color: red;
+    padding-left: .5em;
+    vertical-align: top;
+}
+
+.validation-summary-errors {
+    color: red;
+    list-style: none;
+    width: 220px;
+    font-size: .8em;
+}
+
+.validation-summary-errors ul{
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/*#endregion */
+
+/*#region Unauthorized */
+
+#unauthorized {
+    margin: 3em 0;
+    text-align: center;
+}
+
+    #unauthorized ul {
+        list-style: none;
+        padding: 0;
+        margin: 3em 0;
+    }
+
+    #unauthorized li {
+        display: inline-block;
+        padding: 6px 20px;
+        background-color: #dedede;
+        border: 1px solid gray;
+        -moz-border-radius: 5px;
+        -webkit-border-radius: 5px;
+        border-radius: 5px;
+    }
+
+        #unauthorized li:first-child {
+            margin-right: 2em;
+        }
+
+/*#endregion */
+
+/*#region Footer */
+
+footer {
+    clear: both;
+    margin: 5em 5em .7em 0;
+}
+
+/*#endregion */
+
+@media only screen and (max-width: 600px) {
+
+    body {
+        margin: .2em 0;
+    }
+
+    header {
+        text-align: center;
+        clear: both;
+    }
+}
+
+.ui-footer-fixed {
+	   font-size: .5em;
+}
+
+h1 {
+    font-size: 2em;
+    text-align: center;
+}
+
+.controlgroup-textinput{
+    padding-top:.22em;
+    padding-bottom:.22em;
+}
+
+.breadcrumb{
+    margin-top: 0;
+
+}
+
+.ui-icon-one:after {
+	background-image: url("images/icons-svg/number1.svg");
+    background-size: 20px 20px;
+}
+/* Fallback */
+.ui-nosvg .ui-icon-one:after {
+	background-image: url("images/icons-png/number1.png");
+    background-size: 20px 20px;
+}
+
+.ui-icon-two:after {
+	background-image: url("images/icons-svg/number2.svg");
+    background-size: 20px 20px;
+}
+/* Fallback */
+.ui-nosvg .ui-icon-two:after {
+	background-image: url("images/icons-png/number2.png");
+    background-size: 20px 20px;
+}
+
+.vox {
+    color:lightgreen
+}
+.tablist-left {
+    width: 33%;
+    display: inline-block;
+}
+.tablist-content {
+    width: 60%;
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 5%;
+}
+
+/* A bit custom styling - responsive grid */
+.property-page .ui-listview li .ui-btn p {
+	color: #c0c0c0;
+}
+.property-page .ui-listview li .ui-btn .ui-li-aside {
+	color: #eee;
+}
+
+/* First breakpoint is 48em (768px). 3 column layout. Tiles 250x250 pixels incl. margin at the breakpoint. */
+@media ( min-width: 48em ) {
+	.property-page .ui-content {
+		padding: .5625em; /* 9px */
+	}
+	.property-page .ui-listview li {
+		float: left;
+		width: 30.9333%; /* 33.3333% incl. 2 x 1.2% margin */
+		height: 14.5em; /* 232p */
+		margin: .5625em 1.2%;
+	}
+	.property-page .ui-listview li > .ui-btn {
+		-webkit-box-sizing: border-box; /* include padding and border in height so we can set it to 100% */
+		-moz-box-sizing: border-box;
+		-ms-box-sizing: border-box;
+		box-sizing: border-box;
+		height: 100%;
+	}
+	.property-page .ui-listview li.ui-li-has-thumb .ui-li-thumb {
+		height: auto; /* To keep aspect ratio. */
+		max-width: 100%;
+		max-height: none;
+	}
+	/* Make all list items and anchors inherit the border-radius from the UL. */
+	.property-page .ui-listview li,
+	.property-page .ui-listview li .ui-btn,
+	.property-page .ui-listview .ui-li-thumb {
+		-webkit-border-radius: inherit;
+		border-radius: inherit;
+	}
+	/* Hide the icon */
+	.property-page .ui-listview .ui-btn-icon-right:after {
+		display: none;
+	}
+	/* Make text wrap. */
+	.property-page .ui-listview h2,
+	.property-page .ui-listview p {
+		white-space: normal;
+		overflow: visible;
+		position: absolute;
+		left: 0;
+		right: 0;
+	}
+	/* Text position */
+	.property-page .ui-listview h2 {
+		font-size: 1.25em;
+		margin: 0;
+		padding: .125em 1em;
+		bottom: 50%;
+	}
+	.property-page .ui-listview p {
+		font-size: 1em;
+		margin: 0;
+		padding: 0 1.25em;
+		min-height: 50%;
+		bottom: 0;
+	}
+	/* Semi transparent background and different position if there is a thumb. The button has overflow hidden so we don't need to set border-radius. */
+	.ui-listview .ui-li-has-thumb h2,
+	.ui-listview .ui-li-has-thumb p {
+		background: #111;
+		background: rgba(0,0,0,.8);
+	}
+	.ui-listview .ui-li-has-thumb h2 {
+		bottom: 35%;
+	}
+	.ui-listview .ui-li-has-thumb p {
+		min-height: 35%;
+	}
+	/* ui-li-aside has class .ui-li-desc as well so we have to override some things. */
+	.property-page .ui-listview .ui-li-aside {
+		padding: .125em .625em;
+		width: auto;
+		min-height: 0;
+		top: 0;
+		left: auto;
+		bottom: auto;
+		/* Custom styling. */
+		background: #990099;
+		background: rgba(153,0,153,.85);
+		-webkit-border-top-right-radius: inherit;
+		border-top-right-radius: inherit;
+		-webkit-border-bottom-left-radius: inherit;
+		border-bottom-left-radius: inherit;
+		-webkit-border-bottom-right-radius: 0;
+		border-bottom-right-radius: 0;
+	}
+	/* If you want to add shadow, don't kill the focus style. */
+	.property-page .ui-listview li {
+		-moz-box-shadow: 0px 0px 9px #111;
+		-webkit-box-shadow: 0px 0px 9px #111;
+		box-shadow: 0px 0px 9px #111;
+	}
+	/* Images mask the hover bg color so we give desktop users feedback by applying the focus style on hover as well. */
+	.property-page .ui-listview li > .ui-btn:hover {
+		-moz-box-shadow: 0px 0px 12px #33ccff;
+		-webkit-box-shadow: 0px 0px 12px #33ccff;
+		box-shadow: 0px 0px 12px #33ccff;
+	}
+	/* Animate focus and hover style, and resizing. */
+	.property-page .ui-listview li,
+	.property-page .ui-listview .ui-btn {
+		-webkit-transition: all 500ms ease;
+		-moz-transition: all 500ms ease;
+		-o-transition: all 500ms ease;
+		-ms-transition: all 500ms ease;
+		transition: all 500ms ease;
+	}
+}
+
+/* Second breakpoint is 63.75em (1020px). 4 column layout. Tiles will be 250x250 pixels incl. margin again at the breakpoint. */
+@media ( min-width: 63.75em ) {
+	.property-page .ui-content {
+		padding: .625em; /* 10px */
+	}
+	/* Set a max-width for the last breakpoint to prevent too much stretching on large screens.
+	By setting the max-width equal to the breakpoint width minus padding we keep square tiles. */
+	.property-page .ui-listview {
+		max-width: 62.5em; /* 1000px */
+		margin: 0 auto;
+	}
+	/* Because of the 1000px max-width the width will always be 230px (and margin left/right 10px),
+	but we stick to percentage values for demo purposes. */
+	.property-page .ui-listview li {
+		width: 13%;
+		height: 130px;
+		margin: .625em 1%;
+	}
+}
+
+/* For this demo we used images with a size of 310x310 pixels. Just before the second breakpoint the images reach their max width: 1019px - 2 x 9px padding = 1001px x 30.9333% = ~310px */
+
