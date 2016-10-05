@@ -4,61 +4,138 @@
 </head>
 
 <body>
-    <div data-role="tabs">
-        <ul data-role="listview" data-inset="true" class="tablist-left">
-            <li><a href="#appearance" data-ajax="false">Appearance</a></li>
-            <li><a href="#video" data-ajax="false">Video</a></li>
-            <li><a href="#audio" data-ajax="false">Audio</a></li>
-            <li><a href="#hearing" data-ajax="false">Hearing</a></li>
-            <li><a href="#vision" data-ajax="false">Vision</a></li>
-            <li><a href="#location" data-ajax="false">Location</a></li>
-            <li><a href="#system" data-ajax="false">System</a></li>
-        </ul>
+    <style>
+        .ui-tabs-vertical {
+            width: 55em;
+        }
+        
+        .ui-tabs-vertical .ui-tabs-nav {
+            padding: .2em .1em .2em .2em;
+            float: left;
+            width: 12em;
+        }
+        
+        .ui-tabs-vertical .ui-tabs-nav li {
+            clear: left;
+            width: 100%;
+            border-bottom-width: 1px !important;
+            border-right-width: 0 !important;
+            margin: 0 -1px .2em 0;
+        }
+        
+        .ui-tabs-vertical .ui-tabs-nav li a {
+            display: block;
+        }
+        
+        .ui-tabs-vertical .ui-tabs-nav li.ui-tabs-active {
+            padding-bottom: 0;
+            padding-right: .1em;
+            border-right-width: 1px;
+        }
+        
+        .ui-tabs-vertical .ui-tabs-panel {
+            padding: 1em;
+            float: right;
+            width: 40em;
+        }
+    </style>
+    <div>
+        <h2> Host: <span data-bind="text: name"></span></h2>
+        <div data-role="tabs" class='ui-tabs-vertical'>
+            <ul data-role="listview" data-inset="true">
+                <li><a href="#appearance" data-ajax="false">Appearance</a></li>
+                <li><a href="#addons" data-ajax="false">Add Ons</a></li>
+                <li><a href="#video" data-ajax="false">Video</a></li>
+                <li><a href="#audio" data-ajax="false">Audio</a></li>
+                <li><a href="#hearing" data-ajax="false">Hearing</a></li>
+                <li><a href="#vision" data-ajax="false">Vision</a></li>
+                <li><a href="#location" data-ajax="false">Location</a></li>
+                <li><a href="#system" data-ajax="false">System</a></li>
+            </ul>
 
-        <div id="appearance" class="ui-body-d tablist-content">
-            <h3>Appearance</h3>
+            <div id="appearance" class="ui-body-d tablist-content tablist-right">
+                <h3>Appearance</h3>
+            </div>
+
+            <div id="addons" class="ui-body-d tablist-content">
+                <h3>Add Ons</h3>
+                <h4>Installed Add Ons:</h4>
+                <!-- ko foreach: things -->
+                <div data-role="collapsible">
+                    <h6 data-icon="carat-r">
+                        <span data-bind="text: name"></span>
+                    </h6>
+                    <p>
+                        <!--form>
+                                <label> Device Name: <input data-bind="value: name"></input></label>
+                                <label> Description: <input data-bind="value: description"></input></label>
+                                <label> Image: <input data-bind="value: img" type="text""></input><img src="images/device.png"> </label>
+                                <label> codeOn: <input data-bind="codeOn: device" type="number" min="0"></input></label>
+                                <label> codeOff: <input data-bind="codeOff: device" type="number" min="0"></input></label>
+                                <label> pulseLength: <input data-bind="pulseLength: device" type="number" min="0"></input></label>
+                                <label for="typeSelector"> Switch Type: 
+                                    <select id="typeSelector">
+                                        <option > type 1 </option>
+                                        <option > type 2 </option>
+                                        <option > type 3 </option>
+                                        <option > type 4 </option>
+                                    </select>
+                                </label>
+                                <label> Device #: <input data-bind="value: device" type="number" min="0"></input></label>
+                                <label> Channel #: <input data-bind="value: channel" type="number" min="0"></input></label>
+                                <button data-bind="click: function(){ command('Delete')}">Remove Device</button>
+                                <button data-bind="click: function(){ command('Update')}">Update Device</button>
+                            </form-->
+                    </p>
+                </div>
+                <!-- /ko -->
+                <div data-role="collapsible">
+                        <h6 data-icon="plus">
+                            Install Add Ons
+                        </h6>
+                        <p>
+                            <form data-bind="submit: add">
+
+                                <input type="submit" value="Install"></input>
+                            </form>
+                        </p>
+                    </div>
+            </div>
+
+            <div id="video" class="ui-body-d tablist-content">
+                <h3>Video</h3>
+            </div>
+
+            <div id="audio" class="ui-body-d tablist-content">
+                <h3>Audio</h3>
+            </div>
+
+            <div id="hearing" class="ui-body-d tablist-content">
+                <h3>Hearing</h3>
+            </div>
+
+            <div id="vision" class="ui-body-d tablist-content">
+                <h3>Vision</h3>
+            </div>
+
+            <div id="location" class="ui-body-d tablist-content">
+                <h3>Location</h3>
+            </div>
+
+            <div id="system" class="ui-body-d tablist-content">
+                <h3>System</h3>
+                <form data-bind="submit: update">
+                    <label> Host Name: <input name="name" data-bind="value: name"></input></label>
+
+                    <label> Description: <input name="description" data-bind="value: description"></input></label>
+
+                    <label> Image: <input name="img" type="text" data-bind="value: img"></input><img src="images/home.png"> </label>
+
+                    <input type="submit" value="Update"></input>
+                </form>
+            </div>
         </div>
-
-        <div id="video" class="ui-body-d tablist-content">
-            <h3>Video</h3>
-        </div>
-
-        <div id="audio" class="ui-body-d tablist-content">
-            <h3>Audio</h3>
-        </div>
-
-        <div id="hearing" class="ui-body-d tablist-content">
-            <h3>Hearing</h3>
-        </div>
-
-        <div id="vision" class="ui-body-d tablist-content">
-            <h3>Vision</h3>
-        </div>
-
-        <div id="location" class="ui-body-d tablist-content">
-            <h3>Location</h3>
-        </div>
-
-        <div id="system" class="ui-body-d tablist-content">
-            <h3>System</h3>
-            <form data-bind="submit: update">
-                <label> Host Name: <input name="name" data-bind="value: name"></input></label>
-
-                <label> Description: <input name="description" data-bind="value: description"></input></label>
-
-                <label> Image: <input name="img" type="text" data-bind="value: img"></input><img src="images/home.png"> </label>
-
-                <input type="submit" value="Update"></input>
-            </form>
-        </div>
-    </div>
-    <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
-
-    <div style="width: 100%">
-        <table border="0" style="text-align: center">
-            <tr></tr>
-        </table>
-
+        <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="back" data-iconpos="top">Back</a>
     </div>
 </body>
 

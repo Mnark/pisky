@@ -1,54 +1,98 @@
-﻿var Thing = require('pisky').Thing;
-var http = require('http');
-var MjpegProxy = require('mjpeg-proxy').MjpegProxy;
-var fs = require('fs');
+﻿var Thing = require('pisky').Thing
+process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser;
+var http = require('http')
+var MjpegProxy = require('mjpeg-proxy').MjpegProxy
+var fs = require('fs')
+var path = require('path')
 
 class PiskyIpCam extends Thing {
     constructor(options, callback) {
-        if (!options.html) {
-            options.html = "/pisky-ipcam.html"
-        }
-        options.type =  "camera";
         super(options);
+        if (this.getParameter('name') == undefined) { this.setParameter('name', 'IP Camera') }
+        if (this.getParameter('description') == undefined) { this.setParameter('description', 'IP Camera') }
+        this.html = "/pisky-ipcam.html"
+        this.img = "/images/ipcam.png"
+        this.type = "camera"
+        this.action = 'navigate'
+        if (this.getParameter('image') == undefined) { this.setParameter('image', '/' + this.id + '.mjpg') }
+        if (this.getParameter('camUser') == undefined) { this.setParameter('camUser', '') }
+        if (this.getParameter('camPassword') == undefined) { this.setParameter('camPassword', '') }
+        if (this.getParameter('camUrl') == undefined) { this.setParameter('camUrl', '') }
+
+        var mjpegproxy
+
+        var snapshotTime = 0
+
+        var getVideo = function (req, res) {
+            try {
+                if (mjpegproxy) {
+                    mjpegproxy.proxyRequest(req, res)
+                } else {
+                    mjpegproxy = new MjpegProxy(self.cameraConfig.videostream(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')));
+                    mjpegproxy.proxyRequest(req, res)
+                }
+            } catch (e) {
+                res.send(fs.readFileSync(__dirname + '/public/images/ipcam.png'));
+            }
+        }
+
+        var getImg = function (req, res) {
+            if (Date.now().valueOf() - snapshotTime > 30000) {
+                self.snapshot = new Buffer(0)
+                http.get(self.cameraConfig.snapshot(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')), function (response) {
+                    response.on("data", function (chunk) {
+                        //fs.writeFileSync('./camera-screenshot.jpg', chunk)
+                        self.snapshot = Buffer.concat([self.snapshot ,chunk])
+                        //snapshotTime = Date.now().valueOf()
+                        //res.send(chunk)
+                    })
+                    response.on("end", function (chunk) {
+                        if(chunk){
+                        self.snapshot = Buffer.concat([self.snapshot,chunk])
+                        }
+                        fs.writeFileSync('./camera-screenshot.jpg', self.snapshot)
+                        snapshotTime = Date.now().valueOf()
+                        res.send(self.snapshot)
+                    })
+                }).on('error', function (e) {
+                    console.log("Error taking snapshot from camera: " + JSON.stringify(e))
+                    res.send(fs.readFileSync(__dirname + '/public/images/ipcam.png'))
+                })
+            } else {
+                res.send(fs.readFileSync('./camera-screenshot.jpg'))
+            }
+        }
 
         var self = this;
-        self.snapshotTime = null;
+        self.snapshot
         self.cameraConfig = require(__dirname + "/cameras/generic");
-        self.mjpegproxy = new MjpegProxy(self.cameraConfig.videostream(options.url, options.user, options.password));
-        self.image = options.image || '/' + self.id + '.mjpg';
-        self.img = '/img' + self.id + '.jpg'
 
-        self.getImg = function (req, res) {
-            if (self.snapshotTime == null || Date.now().valueOf() - self.snapshotTime > 30000) {
-                http.get(self.cameraConfig.snapshot(options.url, options.user, options.password), function (response) {
-                    response.on("data", function (chunk) {
-                        fs.writeFileSync('./camera-screenshot.jpg', chunk)
-                        self.snapshotTime = Date.now().valueOf();
-                        res.send(chunk);;
-                    });
-                }).on('error', function (e) {
-                    console.log("Error taking snapshot from camera: " + JSON.stringify(e));
-                    res.send(fs.readFileSync(__dirname + '/public/images/ipcam.png'));
-                });
-            } else {
-                res.send(fs.readFileSync('./camera-screenshot.jpg'));
-            }
-        };
+        self.video = '/' + self.id + '.mjpg';
+        self.img = '/' + self.id + '.jpg'
 
-        this._appuse.push(__dirname + "/public");
-        this._appget.push({ path: self.image, callback: self.mjpegproxy.proxyRequest });
-        this._appget.push({ path: self.img, callback: self.getImg });
+        this._appget.push({ path: self.video, callback: getVideo })
+        this._appget.push({ path: self.img, callback: getImg })
+        this._appuse.push(path.normalize(__dirname + "/public"))
 
-        this.videoProviders.push(options.url + self.image);
+        this.videoProviders.push(self.video);
 
         this.on('command', function (data) {
-            for (var index = 0; index < self.cameraConfig.commands.length; index++) {
-                if ( self.cameraConfig.commands[index].name == data.command) {
-                    http.get(self.cameraConfig.controller(options.url, options.user, options.password) + '&command=' + self.cameraConfig.commands[index].value + '&onestep=0', function (res) {
-                        //console.log('Ip Cam Status:' + res.statusCode)
-                    });
-                    break;
-                };
+            switch (data.command) {
+                case 'Update':
+                    console.info('IPCam received request to update a device with data:' + JSON.stringify(data.value))
+                    for (var prop in data.value) {
+                        this.setParameter(data.value[prop].name, data.value[prop].value)
+                    }
+                    break
+                default:
+                    for (var index = 0; index < self.cameraConfig.commands.length; index++) {
+                        if (self.cameraConfig.commands[index].name == data.command) {
+                            http.get(self.cameraConfig.controller(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')) + '&command=' + self.cameraConfig.commands[index].value + '&onestep=0', function (res) {
+                                //console.log('Ip Cam Status:' + res.statusCode)
+                            });
+                            break;
+                        };
+                    }
             }
         });
 
@@ -120,14 +164,14 @@ class PiskyIpCam extends Thing {
             }
         });
 
-        http.get(self.cameraConfig.status(options.url, options.user, options.password), function (res) {
+        http.get(self.cameraConfig.status(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')), function (res) {
             //console.log("Got response: " + res.statusCode);
             res.on("data", function (chunk) {
+                console.info('IP Cam Status: ' + chunk.toString())
                 var a = '{' + chunk.toString().replace(/var /g, '"').replace(/;/g, ',').replace(/=/g, '":');
                 var c = a.substr(0, a.lastIndexOf(',')) + "}";
                 var options = JSON.parse(c);
-                self.id = options.deviceid;
-                self.emit('ready', options);
+                //self.emit('ready', options);
             });
         }).on('error', function (e) {
             console.log("Error connecting to camera: " + e.message);

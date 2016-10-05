@@ -317,7 +317,7 @@ var Bot = function Bot(data, socket) {
                     });
                 };
             });
-            $("#logIn").dialog();
+            $("#logIn").dialog({width: 500});
             $.mobile.changePage("#logIn");
         } else {
             var username = "username=" + prompt("What's your name for Pisky?");

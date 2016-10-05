@@ -1,6 +1,6 @@
-﻿
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <title>Pisky Net</title>
@@ -22,13 +22,15 @@
     <script src="/javascripts/bot.js"></script>
     <script src="/javascripts/vox.js"></script>
     <style>
-        video, canvas {
+        video,
+        canvas {
             /*margin-left: 230px;
             margin-top: 120px;*/
             position: relative;
         }
     </style>
 </head>
+
 <body>
 
     <div id="indexPage" data-role="page" data-theme="a">
@@ -122,36 +124,38 @@
 
     <!-- Log In Dialog -->
     <div data-role="page" id="logIn">
-        <form action="#">
-            <div style="padding:10px 20px;">
-                <h3>Please sign in</h3>
-                <table>
-                    <tr>
-                        <td>
-                            <canvas id="canvas" width="120" height="120"></canvas>
-                        </td>
-                        <td>
-                            <label for="un" class="ui-hidden-accessible">Username:</label>
-                            <input type="text" name="user" id="un" value="" placeholder="username" data-theme="a" />
+        <div data-role="main" style="width: 50%">
+            <form action="#">
+                <div style="padding:10px 20px;">
+                    <h3>Please sign in</h3>
+                    <table>
+                        <tr>
+                            <td>
+                                <canvas id="canvas" width="120" height="120"></canvas>
+                            </td>
+                            <td>
+                                <label for="un" class="ui-hidden-accessible">Username:</label>
+                                <input type="text" name="user" id="un" value="" placeholder="username" data-theme="a" />
 
-                            <label for="pw" class="ui-hidden-accessible">Password:</label>
-                            <input type="password" name="pass" id="pw" value="" placeholder="password" data-theme="a" />
+                                <label for="pw" class="ui-hidden-accessible">Password:</label>
+                                <input type="password" name="pass" id="pw" value="" placeholder="password" data-theme="a" />
 
-                        </td>
-                    </tr>
-                </table>
+                            </td>
+                        </tr>
+                    </table>
 
-                <button type="submit" data-theme="b">Sign in</button>
-                <!--<div style="position: fixed;">-->
-                <div style="position: relative; ">
-                    <video id="video" width="640" height="480" preload autoplay loop muted style="visibility:hidden; position: absolute"></video>
-                    <!--<canvas id="canvas" width="320" height="240"></canvas>-->
+                    <button type="submit" data-theme="b">Sign in</button>
+                    <!--<div style="position: fixed;">-->
+                    <div style="position: relative; ">
+                        <video id="video" width="640" height="480" preload autoplay loop muted style="visibility:hidden; position: absolute"></video>
+                        <!--<canvas id="canvas" width="320" height="240"></canvas>-->
+                    </div>
+                    <!--</div>-->
+
+
                 </div>
-                <!--</div>-->
-
-
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <!-- Guest Dialog -->
@@ -159,4 +163,5 @@
     </div>
     <!--<script src="/main.js"></script>-->
 </body>
+
 </html>

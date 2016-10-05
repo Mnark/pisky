@@ -1,13 +1,15 @@
-﻿"use strict";
-var util = require('util');
-var EventEmitter = require('events').EventEmitter;
-var express = require('express');
-var http = require('http');
-var https = require('https');
-var bodyParser = require('body-parser');
-var fs = require('fs');
-var uuid = require('node-uuid');
-var os = require('os');
+﻿"use strict"
+var util = require('util')
+var EventEmitter = require('events').EventEmitter
+process.binding('http_parser').HTTPParser = require('http-parser-js').HTTPParser;
+var http = require('http')
+var express = require('express')
+var https = require('https')
+var bodyParser = require('body-parser')
+var fs = require('fs')
+var uuid = require('node-uuid')
+var os = require('os')
+var path = require('path')
 
 class Config extends EventEmitter {
     constructor(options) {
@@ -196,6 +198,9 @@ class Thing extends EventEmitter {
 
         this.getThing = function (id) {
             //console.log('Searching for ' + id + ' in ' + this.things.length + ' things')
+            if (this.id == id) {
+                return this;
+            }
             for (var i = 0; i < this.things.length; i++) {
                 if (this.things[i].id == id) {
                     return this.things[i];
@@ -310,11 +315,17 @@ class Thing extends EventEmitter {
             console.log('Loading thing')
             var thingProfile = this.callback(profile.things[i].id)
             var a, b
+
             if (profile.things[i].requirement.includes('PiskyRF433')) {
                 a = require(__dirname + "/../../add_ons/pisky-rf433")
                 b = new a(thingProfile, this.callback)
             } else {
-                b = new Thing(thingProfile, this.callback)
+                if (profile.things[i].requirement.includes('PiskyIpCam')) {
+                    a = require(__dirname + "/../../add_ons/pisky-ipcam")
+                    b = new a(thingProfile, this.callback)
+                } else {
+                    b = new Thing(thingProfile, this.callback)
+                }
             }
             //            b.on('command', function(data){
             //
@@ -333,10 +344,6 @@ class Thing extends EventEmitter {
         }
 
     }
-
-    //set host(value) {
-    //    this.callback = value
-    // }
 
     get id() { return this.config.getParameter('id') }
 
@@ -399,26 +406,28 @@ class Host extends Thing {
     constructor(options) {
         var load = function (id) {
             console.log('********************************************')
-            console.log('*** Loading Configuration  for ' + id + '***')
             if (!id) {
                 console.log('*** Reading active profile ***')
                 try {
-                    var data = JSON.parse(fs.readFileSync(__dirname + "/.config/pisky.config.json", { 'encoding': 'utf8' }))
-                    //console.log('Profile read: ' + JSON.stringify(data))
+                    var data = JSON.parse(fs.readFileSync(path.normalize(__dirname + "/.config/pisky.config.json"), { 'encoding': 'utf8' }))
+                    console.info('Profile read: ' + JSON.stringify(data))
                     if (data.id) {
                         id = data.id;
+                    } else {
+                        console.warn('Invalid active profile found... Creating new profile ***')
                     }
                 } catch (e) {
-                    console.log('No active profile found... Creating new profile ***')
+                    console.warn('No active profile found (' + e + '). Creating new profile ***')
                 }
             }
             if (id) {
+                console.log('*** Loading Configuration  for ' + id + '***')
                 try {
-                    var data2 = fs.readFileSync(__dirname + "/.config/" + id + ".config.json", { 'encoding': 'utf8' })
+                    var data2 = fs.readFileSync(path.normalize(__dirname + "/.config/" + id + ".config.json"), { 'encoding': 'utf8' })
                     //console.log('Profile read: ' + data2)
                     return JSON.parse(data2);
                 } catch (e) {
-                    console.log('Error loading configuration:' + e)
+                    console.error('Error loading configuration:' + e)
                     return { params: [], things: [] };
                 }
             }
@@ -450,8 +459,8 @@ class Host extends Thing {
         if (this.getParameter('name') == undefined) { this.setParameter('name', 'Unknown') }
         if (this.getParameter('description') == undefined) { this.setParameter('description', 'Unknown') }
         if (this.getParameter('action') == undefined) { this.setParameter('action', 'navigate') }
-        if (this.getParameter('html') == undefined) { this.setParameter('html', 'host.html') }
-        if (this.getParameter('img') == undefined) { this.setParameter('img', '/images/home.png') }
+        this.setParameter('html', 'host.html')
+        this.setParameter('img', '/images/home.png')
 
         this.on('CONFIGCHANGED', function (config) {
             var a = this.getThing(config.id)
@@ -460,26 +469,49 @@ class Host extends Thing {
             } else {
                 console.log("Request to save config of unknown thing: id " + config.id)
             }
-
         })
 
         this.on('message', function (message) {
             console.log('host got message ' + message)
             //send everyone a message for now
-            self.io.emit('message',message)
+            self.io.emit('message', message)
+        })
+
+        this.on('command', (data) => {
+            console.log('Host received command ' + JSON.stringify(data))
+            switch (data.command) {
+                case 'Update':
+                    console.log('Host received request to update its configuration with data:' + JSON.stringify(data.value))
+                    for (var prop in data.value) {
+                        console.log('Host setting ' + data.value[prop].name + ' to ' + data.value[prop].value)
+                        this.setParameter(data.value[prop].name, data.value[prop].value)
+                    }
+                    break
+                default:
+                    console.error('Host received an unexpected request' + JSON.data)
+            }
         })
 
         this.save = function (thing) {
-            console.log('*******Saving profile for id: ' + thing.id)
+            console.log('*******Saving profile for ' + thing.name + ' id: ' + thing.id)
             //console.log('Profile: ' + thing.getConfig())
-            fs.writeFile(__dirname + "/.config/" + thing.id + ".config.json", thing.getConfig(), "utf8", function (err) {
+            fs.writeFile(path.normalize(__dirname + "/.config/" + thing.id + ".config.json"), thing.getConfig(), "utf8", function (err) {
                 if (err) {
-                    console.log("Error saving configuration ") + err.message
+                    console.error("Error saving configuration: ") + JSON.stringify(err)
+                } else {
+                    console.log("Configuration saved")
                 }
-                console.log("Configuration saved")
             });
             for (var index in thing.things) {
                 this.save(thing.things[index])
+            }
+            if (thing.id == this.id) {
+                fs.writeFile(path.normalize(__dirname + "/.config/pisky.config.json"), '{"id":"' + this.id + '"}', "utf8", function (err) {
+                    if (err) {
+                        console.log("Error saving default profile ") + err.message
+                    }
+                    console.log('Profile @: ' + path.normalize(__dirname + "/.config/pisky.config.json saved."))
+                });
             }
         }
 
@@ -546,10 +578,14 @@ class Host extends Thing {
         });
 
         //self.app.use(express.static('public'));
-        this.app.use(express.static(__dirname + '/public'));
+        this.app.use(express.static(path.normalize(__dirname + '/public')));
         for (var i in this._appuse) {
-            console.log('Adding ' + this._appuse[i] + ' to list of directories for ' + this.name)
+            console.log('Adding ' + this._appuse[i].path + ' to list of directories for ' + this.name)
             this.app.use(express.static(this._appuse[i]));
+        }
+        for (var i in this._appget) {
+            console.log('Adding ' + this._appget[i].path + ' to list of files for ' + this.name)
+            this.app.get(this._appget[i].path, this._appget[i].callback );
         }
 
         self.io = require('socket.io')
@@ -652,7 +688,7 @@ class Host extends Thing {
             }
         }
 
-        self.lanurl = "http://" + self.config.getParameter('lanip') + ":" + self.config.getParameter('lanport') + "/";
+        self.lanurl = "http://" + self.config.getParameter('lanip') + ":" + self.config.getParameter('port') + "/";
 
         self.addNetwork = function (name, url, callbackurl) {
             var ioc = require('socket.io-client');
@@ -1031,23 +1067,23 @@ class Host extends Thing {
         //});
     }
 
-    addThing(thing) {
-        console.log('Pisky Host add thing called for' + thing.id)
-        if (super.addThing(thing)) {
-            this.save(thing)
-        }
-    }
+ //   addThing(thing) {
+ //       console.log('Pisky Host add thing called for' + thing.id)
+ //       if (super.addThing(thing)) {
+ //           this.save(thing)
+ //       }
+ //   }
 
-    saveProfile() {
-        this.save(this)
+    //    saveProfile() {
+    //this.save(this)
 
-        fs.writeFile(__dirname + "/.config/pisky.config.json", '{"id":"' + this.id + '"}', "utf8", function (err) {
-            if (err) {
-                console.log("Error saving default profile ") + err.message
-            }
-            console.log('Inititial profile @: ' + __dirname + "/.config/pisky.config.json saved.")
-        });
-    }
+    //        fs.writeFile(__dirname + "/.config/pisky.config.json", '{"id":"' + this.id + '"}', "utf8", function (err) {
+    //            if (err) {
+    //                console.log("Error saving default profile ") + err.message
+    //            }
+    //            console.log('Inititial profile @: ' + __dirname + "/.config/pisky.config.json saved.")
+    //        });
+    //    }
 }
 
 module.exports = Host;

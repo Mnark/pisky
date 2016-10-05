@@ -24,22 +24,26 @@ button, input[type=submit] {
     padding-left: 10px;
 }
 
+.ui-dialog-contain{
+    max-width: 100%
+}
+
 /*#region Header */
 
-header {
-    margin: 0 .7em;
-    position: relative;
-    z-index: -1;
-}
+    header {
+        margin: 0 .7em;
+        position: relative;
+        z-index: -1;
+    }
 
     header p {
         font-size: 2.5em;
         margin: 0;
     }
 
-#userSettings {
-    float: right;
-}
+    #userSettings {
+        float: right;
+    }
 
     #userSettings > form:before {
         content: ' | ';
@@ -49,10 +53,10 @@ header {
         display: inline;
     }
 
-#menu {
-    list-style-type: none;
-    padding: 0;
-}
+    #menu {
+        list-style-type: none;
+        padding: 0;
+    }
 
     #menu li {
         display: inline-block;

@@ -5,52 +5,89 @@
 
 <body>
     <div>
-        <h3 style="text-align: center" data-bind="text: name">Pisky IpCam</h3>
-        <!--img src="#" data-bind="attr: {src: image}" style="width: 640px" /-->
-        <img src="#" data-bind="attr: {src: image}" style="width: 100%"/>
-        <table border="0" style="text-align: center">
-            <tr>
-                <td width=50%></td>
-                <td>
-                    <table border="0">
-                        <tr>
-                            <td width="33%">&nbsp;</td>
-                            <td width="33%">
-                                <a href="#" data-bind="event: {mousedown: function() {command('up')}, mouseup: function() {command('stop up')}}" data-role="button"
-                                    data-icon="arrow-u" data-mini="true" data-iconpos="notext">&nbsp;</a>
-                            </td>
-                            <td width="33%">&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <a href="#" data-bind="event: {mousedown: function() {command('left')},  mouseup: function() {command('stop left')}}" data-role="button"
-                                    data-icon="arrow-l" data-iconpos="notext">&nbsp;</a>
-                            </td>
-                            <td>
-                                <a href="#" data-bind="event: {click: function() {command('stop')}}" data-role="button"
-                                    data-icon="grid" data-iconpos="notext">&nbsp;</a>
-                            </td>
-                            <td>
-                                <a href="#" data-bind="event: {mousedown: function() {command('right')}, mouseup: function() {command('stop right')}}" data-role="button"
-                                    data-icon="arrow-r" data-iconpos="notext">&nbsp;</a>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>&nbsp;</td>
-                            <td>
-                                <a href="#" data-bind="event: {mousedown: function() {command('down')}, mouseup: function() {command('stop down')}}" data-role="button"
-                                    data-icon="arrow-d" data-mini="true" data-iconpos="notext">&nbsp;</a>
-                            </td>
-                            <td>&nbsp;</td>
-                        </tr>
-                    </table>
-                </td>
-                <td width=50%></td>
-            </tr>
-        </table>
-        <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
-    </div>
+        <h3>
+            <img src="" data-bind="attr: {src: img}" style="width: 64px" /> Ip Cam
+        </h3>
+        <div data-role="tabs">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#control" data-ajax="false">Display</a></li>
+                    <li><a href="#status" data-ajax="false">Status</a></li>
+                    <li><a href="#configuration" data-ajax="false">Configuration</a></li>
+                </ul>
+            </div>
 
+            <div id="control" class="ui-content">
+                <table border="0" style="text-align: center">
+                    <tr> 
+                        <td colspan="3"><img src="#" data-bind="attr: {src: image}" style="width: 640px" /></td>
+                    </tr>
+                    <tr>
+                        <td width=50%></td>
+                        <td align="center">
+                            <table border="0">
+                                <tr>
+                                    <td width="33%">&nbsp;</td>
+                                    <td width="33%">
+                                        <a href="#" data-bind="event: {mousedown: function() {command('up')}, mouseup: function() {command('stop up')}}" data-role="button"
+                                            data-icon="arrow-u" data-mini="true" data-iconpos="notext">&nbsp;</a>
+                                    </td>
+                                    <td width="33%">&nbsp;</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <a href="#" data-bind="event: {mousedown: function() {command('left')},  mouseup: function() {command('stop left')}}" data-role="button"
+                                            data-icon="arrow-l" data-iconpos="notext">&nbsp;</a>
+                                    </td>
+                                    <td align="center">
+                                        <a href="#" data-bind="event: {click: function() {command('stop')}}" data-role="button" data-icon="grid" data-iconpos="notext">&nbsp;</a>
+                                    </td>
+                                    <td>
+                                        <a href="#" data-bind="event: {mousedown: function() {command('right')}, mouseup: function() {command('stop right')}}" data-role="button"
+                                            data-icon="arrow-r" data-iconpos="notext">&nbsp;</a>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>&nbsp;</td>
+                                    <td>
+                                        <a href="#" data-bind="event: {mousedown: function() {command('down')}, mouseup: function() {command('stop down')}}" data-role="button"
+                                            data-icon="arrow-d" data-mini="true" data-iconpos="notext">&nbsp;</a>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td width=50%></td>
+                    </tr>
+                </table>
+            </div>
+
+            <div id="status" class="ui-content">
+<!-- -->
+                    <label> Device Name: <input name="name" data-bind="value: name"></input></label>
+
+<!-- -->
+            </div>
+
+            <div id="configuration" class="ui-content">
+                <form data-bind="submit: update">
+                    <label> Device Name: <input name="name" data-bind="value: name"></input></label>
+
+                    <label> Description: <input name="description" data-bind="value: description"></input></label>
+
+                    <label> User: <input name="camUser" type="text" data-bind="value: camUser"></input> </label>
+
+                    <label> Password: <input name="camPassword" type="text" data-bind="value: camPassword"></input> </label>
+
+                    <label> Url: <input name="camUrl" type="text" data-bind="value: camUrl"></input> </label>
+
+                    <input type="submit" value="Update"></input>
+                </form>
+            </div>
+            <div>
+                <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+            </div>
+        </div>
 </body>
 
 </html>
