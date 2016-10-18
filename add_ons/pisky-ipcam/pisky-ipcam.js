@@ -4,17 +4,20 @@ var http = require('http')
 var MjpegProxy = require('mjpeg-proxy').MjpegProxy
 var fs = require('fs')
 var path = require('path')
+var serveStatic = require('serve-static')
 
 class PiskyIpCam extends Thing {
     constructor(options, callback) {
         super(options);
         if (this.getParameter('name') == undefined) { this.setParameter('name', 'IP Camera') }
         if (this.getParameter('description') == undefined) { this.setParameter('description', 'IP Camera') }
-        this.html = "/pisky-ipcam.html"
-        this.img = "/images/ipcam.png"
+        //this.setParameter("baseDir", __dirname)
+        this.serve = serveStatic( __dirname + '/public').bind(this)
+        this.html = "pisky-ipcam.html"
+        this.img = "images/ipcam.png"
         this.type = "camera"
         this.action = 'navigate'
-        if (this.getParameter('image') == undefined) { this.setParameter('image', '/' + this.id + '.mjpg') }
+        if (this.getParameter('video') == undefined) { this.setParameter('video', 'video.mjpg', true) }
         if (this.getParameter('camUser') == undefined) { this.setParameter('camUser', '') }
         if (this.getParameter('camPassword') == undefined) { this.setParameter('camPassword', '') }
         if (this.getParameter('camUrl') == undefined) { this.setParameter('camUrl', '') }
@@ -23,16 +26,15 @@ class PiskyIpCam extends Thing {
 
         var snapshotTime = 0
 
-        var getVideo = function (req, res) {
+        this.getVideo = function (req, res) {
             try {
-                if (mjpegproxy) {
-                    mjpegproxy.proxyRequest(req, res)
-                } else {
+                if (!mjpegproxy) {
                     mjpegproxy = new MjpegProxy(self.cameraConfig.videostream(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')));
-                    mjpegproxy.proxyRequest(req, res)
                 }
+                mjpegproxy.proxyRequest(req, res)
             } catch (e) {
-                res.send(fs.readFileSync(__dirname + '/public/images/ipcam.png'));
+                console.log('error reading video: ' + JSON.stringify(e))
+                //                res.send(fs.readFileSync(__dirname + '/public/images/ipcam.png'));
             }
         }
 
@@ -42,13 +44,13 @@ class PiskyIpCam extends Thing {
                 http.get(self.cameraConfig.snapshot(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')), function (response) {
                     response.on("data", function (chunk) {
                         //fs.writeFileSync('./camera-screenshot.jpg', chunk)
-                        self.snapshot = Buffer.concat([self.snapshot ,chunk])
+                        self.snapshot = Buffer.concat([self.snapshot, chunk])
                         //snapshotTime = Date.now().valueOf()
                         //res.send(chunk)
                     })
                     response.on("end", function (chunk) {
-                        if(chunk){
-                        self.snapshot = Buffer.concat([self.snapshot,chunk])
+                        if (chunk) {
+                            self.snapshot = Buffer.concat([self.snapshot, chunk])
                         }
                         fs.writeFileSync('./camera-screenshot.jpg', self.snapshot)
                         snapshotTime = Date.now().valueOf()
@@ -67,12 +69,10 @@ class PiskyIpCam extends Thing {
         self.snapshot
         self.cameraConfig = require(__dirname + "/cameras/generic");
 
-        self.video = '/' + self.id + '.mjpg';
-        self.img = '/' + self.id + '.jpg'
-
-        this._appget.push({ path: self.video, callback: getVideo })
-        this._appget.push({ path: self.img, callback: getImg })
-        this._appuse.push(path.normalize(__dirname + "/public"))
+        //this._appget.push({ path: this.getParameter('id') + '/video', callback: this.getVideo })
+        this._appget.push({ path: '/img', callback: getImg })
+        this._appget.push({ path: '/video.mjpg', callback: this.getVideo })
+        //this._appuse.push(path.normalize(__dirname + "/public"))
 
         this.videoProviders.push(self.video);
 
@@ -164,18 +164,24 @@ class PiskyIpCam extends Thing {
             }
         });
 
-        http.get(self.cameraConfig.status(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')), function (res) {
-            //console.log("Got response: " + res.statusCode);
-            res.on("data", function (chunk) {
-                console.info('IP Cam Status: ' + chunk.toString())
-                var a = '{' + chunk.toString().replace(/var /g, '"').replace(/;/g, ',').replace(/=/g, '":');
-                var c = a.substr(0, a.lastIndexOf(',')) + "}";
-                var options = JSON.parse(c);
-                //self.emit('ready', options);
-            });
-        }).on('error', function (e) {
-            console.log("Error connecting to camera: " + e.message);
-        });
+        if (self.getParameter('camUrl')) {
+            http.get(self.cameraConfig.status(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')), function (res) {
+                //console.log("Got response: " + res.statusCode);
+                res.on("data", function (chunk) {
+                    //console.info('IP Cam Status: ' + chunk.toString())
+                    //var a = '{' + chunk.toString().replace(/var /g, '"').replace(/;/g, ',').replace(/=/g, '":')
+                    //var c = a.substr(0, a.lastIndexOf(',')) + "}"
+                    //var options = JSON.parse(c)
+                    //self.emit('ready', options);
+                });
+            }).on('error', function (e) {
+                console.log("Error connecting to camera: " + e.message)
+            })
+        }
+    }
+
+    getVideo(req, res) {
+        return this.getVideo
     }
 };
 

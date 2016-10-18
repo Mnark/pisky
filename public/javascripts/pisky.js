@@ -30,13 +30,13 @@ var Thing = function Thing(data, callback) {
 }
 Thing.prototype = new EventEmitter();
 
-Thing.prototype.add = function(form){
+Thing.prototype.add = function (form) {
     var str = $(form).serializeArray()
     this.callback(this.id(), 'Add', str);
-        return false;
+    return false;
 };
 
-Thing.prototype.update = function(form){
+Thing.prototype.update = function (form) {
     var str = $(form).serializeArray()
     this.callback(this.id(), 'Update', str);
     return false;
@@ -45,14 +45,14 @@ Thing.prototype.update = function(form){
 Thing.prototype.view = function (thing) {
     //console.log('view called on thing with ' + thing.action() + ' action' )
     if (thing.action() == 'command') {
-        this.command('TOGGLE'); 
+        this.command('TOGGLE');
     } else {
         // action == 'navigate''
         if ($("#guestPage")) {
-            if (!thing.initialised){
-                for (var i=0;i < thing.things().length;i++){
-                    var t = thing.callback(thing.id(), 'getThing',thing.things()[i]().id )
-                   thing.things()[i](t) 
+            if (!thing.initialised) {
+                for (var i = 0; i < thing.things().length; i++) {
+                    var t = thing.callback(thing.id(), 'getThing', thing.things()[i]().id)
+                    thing.things()[i](t)
                 }
                 thing.initialised = true;
             }
@@ -264,16 +264,16 @@ var Bot = function Bot(data, socket) {
                                 if (self.things.indexOf(function (id) { return things[i].id == id; }) > -1) {
                                 } else {
                                     var newThing = new Thing(things[i], function (id, command, data) {
-                                        if( command == 'getThing'){
+                                        if (command == 'getThing') {
                                             return self.getThing(data)
-                                        }else{
+                                        } else {
                                             self.socket.emit('command', { socketId: self.socket.id, id: id, command: command, value: data });
                                         }
                                     });
                                     self.things.push(newThing);
-
                                 }
                             }
+                            $("indexPage").trigger("refresh")
                         });
 
                         self.socket.on('config', function (config) {
@@ -317,7 +317,7 @@ var Bot = function Bot(data, socket) {
                     });
                 };
             });
-            $("#logIn").dialog({width: 500});
+            $("#logIn").dialog({ width: 500 });
             $.mobile.changePage("#logIn");
         } else {
             var username = "username=" + prompt("What's your name for Pisky?");

@@ -58,7 +58,9 @@
     "express": "~4.13.3",
     "node-uuid": "^1.4.7",
     "socket.io": "~1.3.7",
-    "http-parser-js": "~0.4.4"
+    "http-parser-js": "~0.4.4",
+    "jquery-mobile": "*", 
+    "knockout": "*"
   },
   "description": "Pisky - Web Host for PiSky Applications",
   "devDependencies": {},
@@ -71,7 +73,8 @@
     "public",
     "pisky.js",
     "certs",
-    "app.js"
+    "app.js",
+    ".config"
   ],
   "homepage": "https://github.com/Mnark/pisky#readme",
   "keywords": [
@@ -91,7 +94,7 @@
   ],
   "name": "pisky",
   "optionalDependencies": {},
-  "readme": "ERROR: No README data found!",
+  "readme": "README.md",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mnark/pisky.git"
@@ -99,5 +102,5 @@
   "scripts": {
     "start": "node node_modules/pisky/app.js"
   },
-  "version": "0.1.1"
+  "version": "0.1.3"
 }
