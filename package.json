@@ -94,7 +94,7 @@
   ],
   "name": "pisky",
   "optionalDependencies": {},
-  "readme": "README.md",
+  "readmeFilename": "README.md",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mnark/pisky.git"
