@@ -1,0 +1,20 @@
+{
+  "name": "pisky-location",
+  "version": "0.0.0",
+  "description": "Geo Location Add-on for Pisky",
+  "main": "pisky-location.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Pisky",
+    "GPS",
+    "Location"
+  ],
+  "author": "Mark Basham",
+  "license": "ISC",
+  "dependencies": {
+    "gps": "^0.2.0",
+    "serialport": "^4.0.6"
+  }
+}

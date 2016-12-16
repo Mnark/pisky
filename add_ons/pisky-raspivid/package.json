@@ -1,0 +1,21 @@
+{
+  "name": "pisky-raspivid",
+  "version": "0.0.1",
+  "description": "Pisky Add on for the Raspberry Pi camera module",
+  "main": "pisky-raspivid.js",
+  "author": {
+    "name": "Mark",
+    "email": "mark.basham@ntlworld.com"
+  },
+  "dependencies": {
+    "pisky": "~0.1.0"
+  },
+  "files": [
+    "public"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mnark/pisky/issues"
+  },
+  "readmeFilename": "README.md"
+}

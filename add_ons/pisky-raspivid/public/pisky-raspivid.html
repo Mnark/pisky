@@ -1,0 +1,56 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div>
+        <h3>
+            <img src="" data-bind="attr: {src: img}" style="width: 64px" /> Ip Cam
+        </h3>
+        <div data-role="tabs">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#configuration" data-ajax="false">Configuration</a></li>
+                    <li><a href="#imageConfig" data-ajax="false">Image Settings</a></li>
+                    <li><a href="#videoConfig" data-ajax="false">Video Settings</a></li>
+                </ul>
+            </div>
+
+            <div id="configuration" class="ui-content">
+                <form data-bind="submit: update">
+                    <label> Device Name: <input name="name" data-bind="value: name"></input></label>
+
+                    <label> Description: <input name="description" data-bind="value: description"></input></label>
+
+                    <label> Mode: <input name="mode" type="text" data-bind="value: mode"></input> </label>
+
+                    <!--label> Password: <input name="camPassword" type="text" data-bind="value: camPassword"></input> </label>
+
+                    <label> Url: <input name="camUrl" type="text" data-bind="value: camUrl"></input> </label-->
+
+                    <input type="submit" value="Apply"></input>
+                </form>
+            </div>
+
+            <div id="imageConfig" class="ui-content" data-bind="with: cameraOptionsImage">
+                 <form data-bind="submit: update">
+                    <label> Image width: <input name="width" data-bind="value: width"></input></label>
+                    <label> Image height: <input name="height" data-bind="value: height"></input></label>
+                    <input type="submit" value="Apply"></input>
+                </form>        </div>
+
+            <div id="videoConfig" class="ui-content">
+                    <label> Device Name: <input name="name" data-bind="value: name"></input></label>
+
+
+            </div>
+
+
+            <div>
+                <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+            </div>
+        </div>
+</body>
+
+</html>

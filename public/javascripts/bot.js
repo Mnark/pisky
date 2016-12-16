@@ -1,6 +1,5 @@
 window.onload = function () {
-    bot = new Bot({connect: true });
-    var messages = [];
+    client = new Client({connect: true })
     
     //bot.on('controllers', function (data) {
     //    bot.controllers.removeAll();
@@ -32,13 +31,13 @@ window.onload = function () {
     //bot.on('updatechat', function (username, data) {
     //});
     
-    ko.applyBindings(bot);
+    ko.applyBindings(client.viewModel);
     
     self.recognition.startRecognition();
     
-    bot.on('pulse', function (current_time) {
+    //bot.on('pulse', function (current_time) {
 //        refreshScreen(current_time);
-    });
+    //});
     
     if (window.DeviceOrientationEvent) {
         //document.getElementById("orientation").innerHTML = "DeviceOrientation";

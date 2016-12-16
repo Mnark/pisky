@@ -5,13 +5,30 @@
 
 <body>
     <div data-role="tabs">
-        <ul data-role="listview" data-inset="true" class="tablist-left">
-            <li><a href="#appearance" data-ajax="false">Appearance</a></li>
-        </ul>
-
-        <div id="appearance" class="ui-body-d tablist-content">
-            <h3>Appearance</h3>
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#general" data-ajax="false">General</a></li>
+                <li><a href="#parameters" data-ajax="false">Parameters</a></li>
+            </ul>
         </div>
+
+        <div id="general" class="ui-body-d tablist-content">
+            <h3>General</h3>
+        </div>
+
+        <div id="parameters" class="ui-body-d tablist-content">
+            <h3>Parameters</h3>
+            <div data-bind="foreach: params">
+               <div>
+                <label > 
+                    <span data-bind="text: name"></span>
+                    <input data-bind="value: value"></input>
+                </label>
+
+            </div>
+            </div>
+        </div>
+
     </div>
     <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
 

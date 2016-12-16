@@ -1,0 +1,24 @@
+{
+  "name": "pisky-snowboy",
+  "version": "0.0.1",
+  "description": "Pisky Snowboy - voice recognition",
+  "main": "app.js",
+  "author": {
+    "name": "Mark",
+    "email": "mark.basham@ntlworld.com"
+  },
+  "dependencies": {
+    "snowboy": "*",
+    "pisky": "*",
+    "node-record-lpcm16": "*"
+  },
+  "files": [
+    "public",
+    "app.js"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mnark/pisky/issues"
+  },
+  "readmeFilename": "README.md"
+}

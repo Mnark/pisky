@@ -5,6 +5,12 @@
 
 <body>
     <style>
+        html body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        
         .ui-tabs-vertical {
             width: 55em;
         }
@@ -39,7 +45,7 @@
             width: 40em;
         }
     </style>
-    <div>
+    <div style="height: inherit; overflow: scroll;">
         <h2> Host: <span data-bind="text: name"></span></h2>
         <div data-role="tabs" class='ui-tabs-vertical'>
             <ul data-role="listview" data-inset="true">
@@ -59,47 +65,51 @@
 
             <div id="addons" class="ui-body-d tablist-content">
                 <h3>Add Ons</h3>
-                <h4>Installed Add Ons:</h4>
+                <div data-role="collapsible">
+                    <h4>Installed Add Ons:</h4>
+                    <div data-role="collapsible">
+                    </div>
+                </div>
+                <div data-role="collapsible">
+                    <h4>Install New Add Ons:</h4>
+                    <!-- ko foreach: properties.addons -->
+                    <div data-role="collapsible">
+                        <h6 data-icon="plus" data-bind="text:name">
+                        </h6>
+                        <p> all about the add on....
+                        </p>
+                        <button type="button" data-bind='click: function(data, event) { $root.command("InstallAddon", data, event)}' >Install </button>
+                    </div>
+                    <!-- /ko -->
+                    <div data-role="collapsible">
+                    </div>
+                </div>
+                <h4>Ignore from here:</h4>
                 <!-- ko foreach: things -->
                 <div data-role="collapsible">
                     <h6 data-icon="carat-r">
                         <span data-bind="text: name"></span>
                     </h6>
                     <p>
-                        <!--form>
-                                <label> Device Name: <input data-bind="value: name"></input></label>
-                                <label> Description: <input data-bind="value: description"></input></label>
-                                <label> Image: <input data-bind="value: img" type="text""></input><img src="images/device.png"> </label>
-                                <label> codeOn: <input data-bind="codeOn: device" type="number" min="0"></input></label>
-                                <label> codeOff: <input data-bind="codeOff: device" type="number" min="0"></input></label>
-                                <label> pulseLength: <input data-bind="pulseLength: device" type="number" min="0"></input></label>
-                                <label for="typeSelector"> Switch Type: 
-                                    <select id="typeSelector">
-                                        <option > type 1 </option>
-                                        <option > type 2 </option>
-                                        <option > type 3 </option>
-                                        <option > type 4 </option>
-                                    </select>
-                                </label>
-                                <label> Device #: <input data-bind="value: device" type="number" min="0"></input></label>
-                                <label> Channel #: <input data-bind="value: channel" type="number" min="0"></input></label>
-                                <button data-bind="click: function(){ command('Delete')}">Remove Device</button>
-                                <button data-bind="click: function(){ command('Update')}">Update Device</button>
-                            </form-->
                     </p>
                 </div>
                 <!-- /ko -->
                 <div data-role="collapsible">
-                        <h6 data-icon="plus">
-                            Install Add Ons
-                        </h6>
-                        <p>
-                            <form data-bind="submit: add">
-
-                                <input type="submit" value="Install"></input>
-                            </form>
-                        </p>
-                    </div>
+                    <h6 data-icon="plus">
+                        Install New Add Ons
+                    </h6>
+                    <p>
+                        <form name="InstallAddons" data-bind="submit: command">
+                            <!-- ko foreach: properties.addons -->
+                            <div data-role="fieldcontain">
+                                <label data-bind="text:name, attr: {'for': name}"></label>
+                                <input type="checkbox" data-bind="value: name, attr: {id: name, name: name}">
+                            </div>
+                            <!-- /ko -->
+                            <input type="submit" value="Install"></input>
+                        </form>
+                    </p>
+                </div>
             </div>
 
             <div id="video" class="ui-body-d tablist-content">
@@ -122,14 +132,42 @@
                 <h3>Location</h3>
             </div>
 
-            <div id="system" class="ui-body-d tablist-content">
+            <div id="system" class="ui-body-d tablist-content" style="height:100%">
                 <h3>System</h3>
+                <!-- ko with: state -->
+                <label for="cpuload"> CPU Usage: 
+                <span data-bind="text: CPULoad"></span>%</label>
+
+                <input name="cpuload" id="cpuload" data-hightlight="true" min="0" max="100" value="50" data-bind="attr:{value: CPULoad}"
+                    type="range" />
+                <label> Free Memory: <span data-bind="text: FreeMem"></span></label>
+                <label> Total Memory: <span data-bind="text: TotalMem"></span></label>
+                <!-- /ko -->
                 <form data-bind="submit: update">
-                    <label> Host Name: <input name="name" data-bind="value: name"></input></label>
+                    <div data-role="fieldcontain" data-bind="with: params.name || {value: 'Unknown'}">
+                        <label for="name">  Host Name: </label>
+                        <input id="name" name="name" data-bind="value: value"></input>
+                    </div>
 
-                    <label> Description: <input name="description" data-bind="value: description"></input></label>
+                    <div data-role="fieldcontain" data-bind="with: params.description || {value: 'Unknown'}">
+                        <label for="description"> Description: </label>
+                        <input id="description" name="description" data-bind="value: value"></input>
+                    </div>
 
-                    <label> Image: <input name="img" type="text" data-bind="value: img"></input><img data-bind="src: img"> </label>
+                    <div data-role="fieldcontain" data-bind="with: params.img || {value: ''}">
+                        <label for="img"> Image: </label>
+                        <input id="img" name="img" data-bind="value: value"></input>
+                    </div>
+
+                    <div data-role="fieldcontain" data-bind="with: params.httpPort || {value: 80}">
+                        <label for="httpPort"> Http port: </label>
+                        <input id="httpPort" name="httpPort" data-bind="value: value"></input>
+                    </div>
+
+                    <div data-role="fieldcontain" data-bind="with: params.httpsPort || {value: 443}">
+                        <label for="httpsPort"> Https port: </label>
+                        <input id="httpsPort" name="httpsPort" data-bind="value: value"></input>
+                    </div>
 
                     <input type="submit" value="Update"></input>
                 </form>

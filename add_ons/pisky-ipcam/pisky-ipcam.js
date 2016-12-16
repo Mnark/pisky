@@ -164,11 +164,12 @@ class PiskyIpCam extends Thing {
             }
         });
 
+        console.log("self.getParameter('camUrl' = " + self.getParameter('camUrl'))
         if (self.getParameter('camUrl')) {
             http.get(self.cameraConfig.status(self.getParameter('camUrl'), self.getParameter('camUser'), self.getParameter('camPassword')), function (res) {
                 //console.log("Got response: " + res.statusCode);
                 res.on("data", function (chunk) {
-                    //console.info('IP Cam Status: ' + chunk.toString())
+                    console.info('IP Cam Status: ' + chunk.toString())
                     //var a = '{' + chunk.toString().replace(/var /g, '"').replace(/;/g, ',').replace(/=/g, '":')
                     //var c = a.substr(0, a.lastIndexOf(',')) + "}"
                     //var options = JSON.parse(c)

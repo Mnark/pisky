@@ -10,18 +10,18 @@
         "spec": "latest",
         "type": "tag"
       },
-      "/home/pi/pisky"
+      "C:\\Projects\\testbed"
     ]
   ],
   "_from": "pisky@latest",
-  "_id": "pisky@0.0.314",
+  "_id": "pisky@0.1.5",
   "_inCache": true,
   "_installable": true,
   "_location": "/pisky",
   "_nodeVersion": "6.3.0",
   "_npmOperationalInternal": {
     "host": "packages-12-west.internal.npmjs.com",
-    "tmp": "tmp/pisky-0.0.314.tgz_1471731703303_0.5921060410328209"
+    "tmp": "tmp/pisky-0.1.5.tgz_1480097744910_0.6220645806752145"
   },
   "_npmUser": {
     "name": "netbash",
@@ -39,13 +39,14 @@
     "type": "tag"
   },
   "_requiredBy": [
-    "#USER"
+    "#USER",
+    "/"
   ],
-  "_resolved": "https://registry.npmjs.org/pisky/-/pisky-0.0.314.tgz",
-  "_shasum": "c09d6775fd4897b125e2fce69014ee74b922b356",
+  "_resolved": "file:pisky",
+  "_shasum": "37f9315e64c45a24ae2b6df1f1e30ff57c415064",
   "_shrinkwrap": null,
   "_spec": "pisky",
-  "_where": "/home/pi/pisky",
+  "_where": "C:\\Projects\\testbed",
   "author": {
     "name": "Mark Basham",
     "email": "mark.basham@ntlworld.com"
@@ -54,28 +55,33 @@
     "url": "https://github.com/mnark/pisky/issues"
   },
   "dependencies": {
-    "body-parser": "~1.14.1",
+    "body-parser": "~1.15.2",
     "express": "~4.13.3",
-    "node-uuid": "^1.4.7",
-    "socket.io": "~1.3.7",
     "http-parser-js": "~0.4.4",
-    "jquery-mobile": "*", 
-    "knockout": "*"
+    "http2": "^3.3.6",
+    "jquery-mobile": "*",
+    "knockout": "*",
+    "knockout-mapping": "*",
+    "node-uuid": "^1.4.7",
+    "pem": "^1.8.3",
+    "pisky-parser": "*",
+    "serve-static": "*",
+    "socket.io": "~1.3.7"
   },
-  "description": "Pisky - Web Host for PiSky Applications",
+  "description": "Pisky - Base for Pisky based Applications",
   "devDependencies": {},
   "directories": {},
   "dist": {
-    "shasum": "c09d6775fd4897b125e2fce69014ee74b922b356",
-    "tarball": "https://registry.npmjs.org/pisky/-/pisky-0.0.314.tgz"
+    "shasum": "37f9315e64c45a24ae2b6df1f1e30ff57c415064",
+    "tarball": "https://registry.npmjs.org/pisky/-/pisky-0.1.5.tgz"
   },
   "files": [
     "public",
     "pisky.js",
-    "certs",
     "app.js",
-    ".config"
+    "config"
   ],
+  "gitHead": "2cbe18ca572b4977c4d53f0e74f48159c1011510",
   "homepage": "https://github.com/Mnark/pisky#readme",
   "keywords": [
     "socket.io",
@@ -94,7 +100,7 @@
   ],
   "name": "pisky",
   "optionalDependencies": {},
-  "readmeFilename": "README.md",
+  "readme": "ERROR: No README data found!",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Mnark/pisky.git"
@@ -102,5 +108,5 @@
   "scripts": {
     "start": "node node_modules/pisky/app.js"
   },
-  "version": "0.1.3"
+  "version": "0.1.5"
 }

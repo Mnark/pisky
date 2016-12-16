@@ -3,18 +3,16 @@
 
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pisky Net</title>
     <link href="/favicon.ico" rel="shortcut icon" type="image/x-icon" />
-    <meta name="viewport" content="width=device-width" />
-    <link href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" rel="stylesheet" />
+    <link href="/stylesheets/jquery.mobile-1.4.5.css" rel="stylesheet" />
     <link href="/stylesheets/site.css" rel="stylesheet" />
     <script src="/javascripts/events.js"></script>
-    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-    <!--script src="/jquery.min.js"></script-->
-    <script src="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-    <!--script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.0/knockout-min.js"></script-->
+    <script src="/javascripts/jquery-2.2.4.js"></script>
+    <script src="/javascripts//jquery.mobile-1.4.5.js"></script>
     <script src="/knockout-latest.js"></script>
-    <!--script src="https://cdn.socket.io/socket.io-1.3.5.js"></script-->
+    <script src="/knockout.mapping.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/javascripts/latlon-ellipsoidal.js"></script>
     <script src="/javascripts/latlon-vincenty.js"></script>
@@ -22,7 +20,6 @@
     <script src="/javascripts/tracking.js"></script>
     <script src="/javascripts/data/face-min.js"></script>
     <script src="/javascripts/pisky.js"></script>
-    <script src="/javascripts/bot.js"></script>
     <script src="/javascripts/vox.js"></script>
     <style>
         video,
@@ -86,41 +83,16 @@
                 <!--<label for="things"><i>These are not the droids you were looking for...</i></label>-->
                 <ul id="things" data-role="listview" data-inset="true" data-bind="foreach: things">
                     <li>
-
-                        <a href="#" class="ui-grid-a" data-bind="click: view">
-                            <img src="/images/bot.png" data-bind="attr: {src: img}" />
-                            <!--data-bind="click: toggle"-->
-
+                        <a href="#" class="ui-grid-a" data-bind="click: $root.view">
+                            <img src="/images/host.png" data-bind="attr: {src: img}" />
                             <span class="ui-block-a" data-bind="text: name"></span>
-                            <!--<span class="ui-block-b" data-bind="text: city"></span>-->
-                        </a>
-                        <!--a data-bind="attr: { href: 'http://' + lanip + ':' + lanport,}">
-                            Connect
-                        </a-->
-                    </li>
-                </ul>
-
-            </div>
-            <div>
-                <!--<label for="users"> Users <i></i></label>-->
-                <ul id="users" data-role="listview" data-inset="true" data-bind="foreach: users">
-                    <li>
-                        <a href="#" class="ui-grid-a">
-                            <!--data-bind="click: toggle"-->
-                            <img src="images/user.png" />
-                            <span class="ui-block-a" data-bind="text: name"></span>
-                            <!--<span class="ui-block-b" data-bind="text: city"></span>-->
-                        </a>
-                        <a data-bind="attr: { href: '#chat'}">
-                            Chat
                         </a>
                     </li>
                 </ul>
-
             </div>
 
             <div data-role="footer" data-position="fixed" data-theme="b">
-                <p style="float: right">&copy; 2015 - <a href="http://piskynet.azurewebsites.net" data-role="button"><span class="vox">Pi Sky Net</span> Productions</a></p>
+                <p style="float: right">&copy; 2016 - <a href="http://piskynet.azurewebsites.net" data-role="button"><span class="vox">Pi Sky Net</span> Productions</a></p>
             </div>
         </div>
     </div>
@@ -162,7 +134,7 @@
     </div>
 
     <!-- Guest Dialog -->
-    <div data-role="page" id="guestPage">
+    <div data-role="page" id="guestPage" style="overflow: scroll">
     </div>
     <!--<script src="/main.js"></script>-->
 </body>

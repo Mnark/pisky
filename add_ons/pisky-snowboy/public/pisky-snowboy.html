@@ -1,0 +1,60 @@
+<html>
+
+<head>
+</head>
+
+<body>
+	<div>
+		<h3>
+			<img src="" data-bind="attr: {src: img}" style="width: 64px" /> Snowboy
+		</h3>
+		<div data-role="tabs">
+			<div data-role="navbar">
+				<ul>
+					<li><a href="#control" data-ajax="false">Training</a></li>
+					<li><a href="#status" data-ajax="false">Status</a></li>
+					<li><a href="#configuration" data-ajax="false">Configuration</a></li>
+				</ul>
+			</div>
+
+			<div id="control" class="ui-content">
+				<table border="0" style="text-align: center">
+					<tr>
+						<td width=50%></td>
+						<td align="center">
+						</td>
+						<td width=50%></td>
+					</tr>
+				</table>
+			</div>
+
+			<div id="status" class="ui-content">
+				<!-- -->
+				<label> Device Name: <input name="name" data-bind="value: name"></input></label>
+				<label> Microphone: <audio name="micaudio" src="https://192.168.0.18/e290f200-9a2b-11e6-bf70-cf21dbc23269/audio.wav" type="audio/wav"></audio></label>
+				<!-- -->
+			</div>
+
+			<div id="configuration" class="ui-content">
+				<form data-bind="submit: update">
+					<label> Device Name: <input name="name" data-bind="value: name"></input></label>
+
+					<label> Description: <input name="description" data-bind="value: description"></input></label>
+
+					<label> Kitt.ai API Token: <input name="apiKey" data-bind="value: apiKey"></input></label>
+
+					<label> <input type="checkbox" name="alexaEnabled"  data-bind="value: alexaEnabled">Enable Alexa support (requires 'pisky-alexa' to be installed)</label>
+					<label> <input type="checkbox" name="okGoogleEnabled"   disabled>Enable OK Google support (Not available)</label>
+					<label> <input type="checkbox" name="cortanaEnabled"    disabled>Enable Cortana support (Not available)</label>
+					<label> <input type="checkbox" name="siriEnabled"    disabled>Enable Siri support (Not available)</label>
+					<label> <input type="checkbox" name="sphinxiEnabled"    disabled>Enable PocketSphinx support (Not available)</label>
+					<input type="submit" value="Update"></input>
+				</form>
+			</div>
+			<div>
+				<a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+			</div>
+		</div>
+</body>
+
+</html>

@@ -1,0 +1,108 @@
+<html>
+
+<head>
+</head>
+
+<body>
+    <div data-role="tabs">
+        <div data-role="navbar">
+            <ul>
+                <li><a href="#map" data-ajax="false">Map</a></li>
+                <li><a href="#general" data-ajax="false">General</a></li>
+                <li><a href="#configuration" data-ajax="false">Configuration</a></li>
+            </ul>
+        </div>
+
+        <div id="map" width="100%" height="600px" class="ui-body-d tablist-content">
+            <h3>Map</h3>
+            <div id="googlemap" width="100%" style="height:600px">
+
+            </div>
+        </div>
+
+        <div id="general" class="ui-body-d tablist-content">
+            <h3>General</h3>
+            <!-- ko with: state -->
+            <div data-role="fieldcontain">
+                <label for="time">Current time: </label><span id="time" data-bind="text: time"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="lat">Latitude: </label><span id="lat" data-bind="text: lat"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="lon">Longitude: </label><span id="lon" data-bind="text: lon"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="alt">Altitude: </label><span id="alt" data-bind="text: alt"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="speed">Speed over ground (km/h): </label><span id="speed" data-bind="text: speed"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="track">Track in degrees: </label><span id="track" data-bind="text: track"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="satsActive">Number of active satellites: </label><span id="satsActive" data-bind="text: satsActive().length"></span>
+            </div>
+            <div data-role="fieldcontain">
+                <label for="satsVisible">Number of visible satellites: </label><span id="satsVisible" data-bind="text: satsVisible().length"></span>
+            </div>
+            <!-- /ko -->
+        </div>
+
+        <div id="configuration" class="ui-body-d tablist-content">
+            <h3>Configuration</h3>
+
+            <form data-bind="submit: update">
+                <div data-role="fieldcontain" data-bind="with: params.name">
+                    <label for="devName"> Device Name: </label>
+                    <input id="devName" name="name" data-bind="value: value"></input>
+                </div>
+                <div data-role="fieldcontain" data-bind="with: params.pulse">
+                    <label for="pulse"> Refresh rate: </label>
+                    <input id="pulse" name="pulse" data-bind="value: value"></input>
+                </div>
+                <div>
+                    <h4> Serial Port </h4>
+                    <div data-role="fieldcontain" data-bind="with: params.path || {value: ''}">
+                        <label for="path"> Path: </label>
+                        <input id="path" name="path" data-bind="value: value"></input>
+                    </div>
+                    <div data-role="fieldcontain" data-bind="with: params.baud || {value: '4800'}">
+                        <label for="baud"> Baud Rate: </label>
+                        <input id="baud" name="baud" data-bind="value: value"></input>
+                    </div>
+                </div>
+                <input type="submit" value="Update"></input>
+            </form>
+        </div>
+
+    </div>
+    <a href="#" onclick='window.history.back(); return false;' data-role="button" data-icon="delete" data-iconpos="top">Close</a>
+
+    <script>
+        function initMap() {
+            //debugger
+            var pos = new google.maps.LatLng(Number(document.getElementById('lat').innerText), Number(document.getElementById('lon').innerText))
+            console.log ('Poisition = ' + JSON.stringify(pos))
+            map = new google.maps.Map(document.getElementById('googlemap'), {
+                zoom: 14,
+                center: pos
+            })
+            var marker = new google.maps.Marker({
+                position: pos,
+                map: map,
+                title: 'GPS Location'
+            })
+            map.setCenter(pos)
+            map.setZoom(14)
+            google.maps.event.trigger(map, 'resize')
+      }
+
+    </script>
+
+    <script async src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2sj6ZvpqKmmhjetFPxomfEsWOzCRz_Kg&callback=initMap">
+    </script>
+</body>
+
+</html>
